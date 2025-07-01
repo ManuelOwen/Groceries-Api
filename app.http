@@ -1,0 +1,188 @@
+@url = http://localhost:3000/api/v1
+@adminToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIwLCJlbWFpbCI6Im1hcmlAZXhhbXBsZS5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTE0MDQ4MTksImV4cCI6MTc1MTQwODQxOX0.I8G6xYRgVBfpC--tovsSODDWQIzbmOUYXd54-DCvHWQ
+@userToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjgsImVtYWlsIjoidGVuQGV4YW1wbGUuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NTEzNzE1NDQsImV4cCI6MTc1MTM3NTE0NH0.sFLzn870ZNIO9B1djAl7S-JMBPzWYcrn39oJCxex5m4
+@driverToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjE0LCJlbWFpbCI6Im5qb3JvZ2VAZXhhbXBsZS5jb20iLCJyb2xlIjoiZHJpdmVyIiwiaWF0IjoxNzUxMzcxNjY0LCJleHAiOjE3NTEzNzUyNjR9.Kw2vbyXeVShn2ALipTWDXyAnJiS0rwXKjxxNyNWEZso
+
+### get all users
+GET {{url}}/users
+Authorization: Bearer {{adminToken}}
+
+### seed database
+POST {{url}}/seed
+### get users by id
+GET {{url}}/users/2
+Authorization: Bearer {{adminToken}}
+### create a new user
+POST {{url}}/users
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "email": "njoroge@example.com",
+  "fullName": "abi Doe",
+  "address": "789 Oak St, City, Country",
+  "password": "password123",
+  "phoneNumber": "555-555-5555",
+  "role": "driver"
+}
+### update a user
+PUT {{url}}/users/10
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "email": "kimani@example.com",
+  "fullName": "Kimani ichungwa",
+  "address": "789 Oak St, City, Country",
+  "password": "password123",
+  "phoneNumber": "555-555-5555",
+  "role": "driver"
+}
+### delete a user
+DELETE {{url}}/users/2
+### login a user
+POST {{url}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "ten@example.com",
+  "password": "password123"
+}
+### login as a user
+POST {{url}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "ten@example.com",
+  "password": "password123"
+}
+### login as an admin
+POST {{url}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "mari@example.com",
+  "password": "password123"
+}
+
+### login as driver
+POST {{url}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "njoroge@example.com",
+  "password": "password123"
+}
+
+### PRODUCTS ENDPOINTS ###
+
+### Get all products (public access)
+GET {{url}}/products
+Authorization: Bearer {{adminToken}}
+
+### Get product by id (public access)
+GET {{url}}/products/1
+
+### Create a new product (admin only)
+POST {{url}}/products
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "product_name": "oranges",
+  "availability": true,
+  "price": 1.99,
+  "category": "Fruits",
+  "imageUrl": "https://example.com/oranges.jpg"
+}
+
+### Update a product (admin only)
+PUT {{url}}/products/3
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "product_name": "Updated Premium Oranges",
+  "availability": true,
+  "price": 12.49,
+  "category": "Fruits",
+  "imageUrl": "https://example.com/updated-oranges.jpg"
+}
+
+### Delete a product (admin only)
+DELETE {{url}}/products/1
+Authorization: Bearer {{adminToken}}
+
+### LOCATION ENDPOINTS ###
+
+### Get all locations (public access)
+GET {{url}}/location
+
+### Get location by id (public access)
+GET {{url}}/location/1
+
+### Create a new location (admin only)
+POST {{url}}/location
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "location_name": "Central Market",
+  "address": "123 Main St, Nairobi, Kenya",
+  "postal_code": "00100"
+}
+
+### Update a location (admin only)
+PUT {{url}}/location/1
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "location_name": "Central Market Updated",
+  "address": "123 Main St, Nairobi, Kenya",
+  "postal_code": "00100"
+}
+
+### Delete a location (admin only)
+DELETE {{url}}/location/1
+Authorization: Bearer {{adminToken}}
+
+### get all products
+GET {{url}}/products
+#### seed products
+POST {{url}}/seed
+
+
+### locations
+### Get all locations
+GET {{url}}/location
+### seed locations
+POST {{url}}/seed/locations
+Authorization: Bearer {{adminToken}}
+### Get location by id
+GET {{url}}/location/3
+
+### Create a new location
+POST {{url}}/location
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "location_name": "Central Market",
+  "address": "123 Main St, Nairobi, Kenya",
+  "postal_code": "00100"
+}
+
+### Update a location
+PUT {{url}}/location/3
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "location_name": "Central Market Updated",
+  "address": "123 Main St, Mombasa, Kenya",
+  "postal_code": "00100"
+}
+### Delete a location
+DELETE {{url}}/location/3
+Authorization: Bearer {{adminToken}}
