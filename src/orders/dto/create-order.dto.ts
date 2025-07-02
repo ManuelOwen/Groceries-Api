@@ -7,36 +7,38 @@ import {
   IsPositive,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { PaymentMethod, PaymentStatus } from '../entities/payment.entity';
+import { OrderStatus, OrderPriority } from '../entities/order.entity';
 
-export class CreatePaymentDto {
+export class CreateOrderDto {
   @IsNumber()
   @IsPositive()
   @Type(() => Number)
-  amount: number;
-
-  @IsEnum(PaymentMethod)
-  @IsNotEmpty()
-  payment_method: PaymentMethod;
+  total_amount: number;
 
   @IsNumber()
   @IsNotEmpty()
   @Type(() => Number)
   user_id: number;
 
-  @IsEnum(PaymentStatus)
+  @IsEnum(OrderStatus)
   @IsOptional()
-  status?: PaymentStatus;
+  status?: OrderStatus;
+
+  @IsEnum(OrderPriority)
+  @IsOptional()
+  priority?: OrderPriority;
 
   @IsString()
   @IsOptional()
-  transaction_id?: string;
+  order_number?: string;
 
   @IsString()
   @IsOptional()
-  reference_number?: string;
+  shipping_address?: string;
 
   @IsString()
   @IsOptional()
-  description?: string;
+  billing_address?: string;
+
+ 
 }

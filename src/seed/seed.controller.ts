@@ -13,4 +13,32 @@ export class SeedController {
     this.logger.log('Seed endpoint called');
     return this.seedService.seed();
   }
+
+  @Post('payments')
+  @HttpCode(HttpStatus.OK)
+  async seedPayments() {
+    this.logger.log('Seed payments endpoint called');
+    return this.seedService.seedPayments();
+  }
+
+  @Post('orders')
+  @HttpCode(HttpStatus.OK)
+  async seedOrders() {
+    this.logger.log('Seed orders endpoint called');
+    return this.seedService.seedOrders();
+  }
+
+  @Post('feedbacks')
+  @HttpCode(HttpStatus.OK)
+  async seedFeedbacks() {
+    this.logger.log('Seed feedbacks endpoint called');
+    return this.seedService.seedFeedbacks();
+  }
+
+  @Post('customers-support')
+  @HttpCode(HttpStatus.OK)
+  async seedCustomersSupport() {
+    this.logger.log('Seed customer support endpoint called');
+    return this.seedService.seedCustomersSupport();
+  }
 }

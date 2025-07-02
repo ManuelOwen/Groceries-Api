@@ -1,14 +1,21 @@
 @url = http://localhost:3000/api/v1
-@adminToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIwLCJlbWFpbCI6Im1hcmlAZXhhbXBsZS5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTE0MDQ4MTksImV4cCI6MTc1MTQwODQxOX0.I8G6xYRgVBfpC--tovsSODDWQIzbmOUYXd54-DCvHWQ
-@userToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjgsImVtYWlsIjoidGVuQGV4YW1wbGUuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NTEzNzE1NDQsImV4cCI6MTc1MTM3NTE0NH0.sFLzn870ZNIO9B1djAl7S-JMBPzWYcrn39oJCxex5m4
+@adminToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIwLCJlbWFpbCI6Im1hcmlAZXhhbXBsZS5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTE0NTM5ODQsImV4cCI6MTc1MTQ1NzU4NH0.AI8DCFp-WStPu5GuAGVg9j00QLz2lewE5Uq3qH5aFx0
+@userToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjE5LCJlbWFpbCI6InRlbkBleGFtcGxlLmNvbSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzUxNDU0MjMyLCJleHAiOjE3NTE0NTc4MzJ9.4-loc3xi9kvriyaGWLYdeMeobGdAq0Om8p2U7GhYXMA
 @driverToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjE0LCJlbWFpbCI6Im5qb3JvZ2VAZXhhbXBsZS5jb20iLCJyb2xlIjoiZHJpdmVyIiwiaWF0IjoxNzUxMzcxNjY0LCJleHAiOjE3NTEzNzUyNjR9.Kw2vbyXeVShn2ALipTWDXyAnJiS0rwXKjxxNyNWEZso
 
 ### get all users
 GET {{url}}/users
 Authorization: Bearer {{adminToken}}
 
-### seed database
+### seed database (all data)
 POST {{url}}/seed
+
+### seed only payments
+POST {{url}}/seed/payments
+
+### seed only orders
+POST {{url}}/seed/orders
+
 ### get users by id
 GET {{url}}/users/2
 Authorization: Bearer {{adminToken}}
@@ -185,4 +192,266 @@ Content-Type: application/json
 }
 ### Delete a location
 DELETE {{url}}/location/3
+Authorization: Bearer {{adminToken}}
+
+### PAYMENTS ENDPOINTS ###
+
+### Get all payments (admin only)
+GET {{url}}/payments
+Authorization: Bearer {{adminToken}}
+
+### Get payment by id (admin and user)
+GET {{url}}/payments/1
+Authorization: Bearer {{adminToken}}
+
+### Get payments by user id (admin and user)
+GET {{url}}/payments/user/1
+Authorization: Bearer {{adminToken}}
+
+### Create a new payment (admin and user) - Auto-generated transaction ID
+POST {{url}}/payments
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "amount": 100.50,
+  "payment_method": "mpesa",
+  "user_id": 19,
+  "status": "pending",
+  "description": "Payment for groceries - Auto transaction ID"
+}
+
+### Create a new payment with custom transaction ID (optional)
+POST {{url}}/payments
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "amount": 250.75,
+  "payment_method": "card",
+  "user_id": 19,
+  "status": "completed",
+
+  "description": "Payment with custom transaction ID"
+}
+
+### Update a payment (admin only)
+PUT {{url}}/payments/2
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "amount": 180.75,
+  "payment_method": "card",
+  "status": "completed",
+  "transaction_id": "TX987654321",
+  "reference_number": "REF456",
+  "description": "Updated payment for groceries"
+}
+
+### Delete a payment (admin only)
+DELETE {{url}}/payments/1
+Authorization: Bearer {{adminToken}}
+
+### ORDERS ENDPOINTS ###
+
+### Get all orders (admin and driver only)
+GET {{url}}/orders
+Authorization: Bearer {{adminToken}}
+
+### Get order by id (admin, user, and driver)
+GET {{url}}/orders/10
+Authorization: Bearer {{adminToken}}
+
+### Get orders by user id (admin and user)
+GET {{url}}/orders/user/19
+Authorization: Bearer {{adminToken}}
+
+### Get orders by status (admin and driver)
+GET {{url}}/orders/status/pending
+Authorization: Bearer {{adminToken}}
+
+### Create a new order (admin and user) - Auto-generated order number
+POST {{url}}/orders
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "total_amount": 150.75,
+  "user_id": 19,
+  "status": "pending",
+  "priority": "normal",
+  "shipping_address": "123 Main St, Nairobi, Kenya",
+  "billing_address": "123 Main St, Nairobi, Kenya",
+  "notes": "Please deliver during business hours"
+}
+
+### Create a new order with custom order number (optional)
+POST {{url}}/orders
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "total_amount": 89.50,
+  "user_id": 19,
+  "status": "confirmed",
+  "priority": "high",
+  "order_number": "CUSTOM20250702001",
+  "shipping_address": "456 Oak Ave, Nairobi, Kenya",
+  "billing_address": "456 Oak Ave, Nairobi, Kenya",
+  "notes": "Urgent delivery required"
+}
+
+### Update an order (admin and driver only)
+PUT {{url}}/orders/14
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "status": "shipped",
+  "priority": "high",
+  "notes": "Order has been shipped via express delivery"
+}
+
+### Delete an order (admin only)
+DELETE {{url}}/orders/14
+Authorization: Bearer {{adminToken}}
+
+### seed orders
+POST {{url}}/seed/orders
+
+### FEEDBACKS ENDPOINTS ###
+
+### Get all feedbacks (admin only)
+GET {{url}}/feedbacks
+Authorization: Bearer {{adminToken}}
+
+### Get feedback by id (admin and user)
+GET {{url}}/feedbacks/1
+Authorization: Bearer {{adminToken}}
+
+### Get feedbacks by user id (admin and user)
+GET {{url}}/feedbacks/user/19
+Authorization: Bearer {{adminToken}}
+
+### Get feedbacks by status (admin only)
+GET {{url}}/feedbacks/status/pending
+Authorization: Bearer {{adminToken}}
+
+### Create a new feedback (admin and user)
+POST {{url}}/feedbacks
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "message": "Great service! Very satisfied with the delivery speed.",
+  "rating": 5,
+  "subject": "Excellent Delivery Experience",
+  "user_id": 19
+}
+
+### Create another feedback with different rating
+POST {{url}}/feedbacks
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "message": "The product quality was good but delivery was delayed.",
+  "rating": 3,
+  "subject": "Mixed Experience",
+  "user_id": 19
+}
+
+### Update a feedback (admin for status, users for content)
+PUT {{url}}/feedbacks/1
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "status": "reviewed",
+  "admin_response": "Thank you for your feedback. We appreciate your review and will continue to maintain our service quality."
+}
+
+### Delete a feedback (admin only)
+DELETE {{url}}/feedbacks/1
+Authorization: Bearer {{adminToken}}
+
+### seed feedbacks
+POST {{url}}/seed/feedbacks
+Authorization: Bearer {{adminToken}}
+
+### CUSTOMER SUPPORT ENDPOINTS ###
+
+### Get all support tickets (admin only)
+GET {{url}}/customers-support
+Authorization: Bearer {{adminToken}}
+
+### Get support ticket by id (admin and user)
+GET {{url}}/customers-support/6
+Authorization: Bearer {{adminToken}}
+
+### Get support tickets by user id (admin and user)
+GET {{url}}/customers-support/user/19
+Authorization: Bearer {{adminToken}}
+
+### Get support tickets by status (admin only)
+GET {{url}}/customers-support/status/open
+Authorization: Bearer {{adminToken}}
+
+### Create a new support ticket (admin and user)
+POST {{url}}/customers-support
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "subject": "Order delivery issue",
+  "description": "My order was supposed to be delivered yesterday but I haven't received it yet. The tracking shows delivered but I didn't get anything.",
+  "priority": "high",
+  "category": "order_issue",
+  "user_id": 19,
+  "contact_email": "ten@example.com",
+  "contact_phone": "+1234567890"
+}
+
+### Create a technical support ticket
+POST {{url}}/customers-support
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "subject": "Unable to login to my account",
+  "description": "I'm getting an error message when trying to log into my account. It says 'Invalid credentials' even though I'm using the correct password.",
+  "priority": "medium",
+  "category": "technical",
+  "user_id": 19,
+  "contact_email": "ten@example.com"
+}
+
+### Update a support ticket (admin for status/response, users for their own content)
+PUT {{url}}/customers-support/7
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "status": "in_progress",
+  "admin_response": "Hi, we've located your order and it seems there was a delivery issue. Our driver will attempt redelivery today between 2-4 PM. You'll receive a tracking update shortly.",
+  "assigned_to": 20
+}
+
+### Update ticket status to resolved
+PUT {{url}}/customers-support/8
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "status": "resolved",
+  "admin_response": "Your order has been successfully redelivered. Thank you for your patience. If you have any other concerns, please don't hesitate to contact us."
+}
+
+### Delete a support ticket (admin only)
+DELETE {{url}}/customers-support/7
+Authorization: Bearer {{adminToken}}
+
+### seed customer support tickets
+POST {{url}}/seed/customers-support
 Authorization: Bearer {{adminToken}}

@@ -15,6 +15,9 @@ import { CustomThrottlerGuard } from './rate limiter/throttler.guard';
 import { ProductsModule } from './products/products.module';
 import { LocationModule } from './location/location.module';
 import { PaymentsModule } from './payments/payments.module';
+import { OrdersModule } from './orders/orders.module';
+import { FeedbacksModule } from './feedbacks/feedbacks.module';
+import { CustomersSupportModule } from './customers-support/customers-support.module';
 
 @Module({
   imports: [
@@ -36,6 +39,9 @@ import { PaymentsModule } from './payments/payments.module';
     ProductsModule,
     LocationModule,
     PaymentsModule,
+    OrdersModule,
+    FeedbacksModule,
+    CustomersSupportModule,
   ],
   controllers: [AppController],
   providers: [
