@@ -164,7 +164,7 @@ export class OrdersService {
       };
     }
   }
-
+//  find order by category
   // delete order by id
   async deleteOrder(id: number): Promise<ApiResponse<null>> {
     try {
@@ -258,4 +258,33 @@ export class OrdersService {
       };
     }
   }
+  // get order by priority
+  async getOrdersByPriority(priority: Order['priority']): Promise<ApiResponse<Order[]>> {
+    try {
+      const orders = await this.orderRepository.find({
+        where: { priority },
+        relations: ['user'],
+        select: {
+          user: {
+            id: true,
+            fullName: true,
+            email: true,
+          },
+        },
+      });
+
+      return {
+        success: true,
+        message: `Found ${orders.length} orders with priority ${priority}`,
+        data: orders,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Failed to fetch orders with priority ${priority}`,
+        error: error.message,
+      };
+    }
+  }
+  
 }

@@ -1,5 +1,5 @@
-@url = http://localhost:3000/api/v1
-@adminToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIwLCJlbWFpbCI6Im1hcmlAZXhhbXBsZS5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTE0NTM5ODQsImV4cCI6MTc1MTQ1NzU4NH0.AI8DCFp-WStPu5GuAGVg9j00QLz2lewE5Uq3qH5aFx0
+@url = http://localhost:8000/api/v1
+@adminToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIwLCJlbWFpbCI6Im1hcmlAZXhhbXBsZS5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTE3NTgyMzYsImV4cCI6MTc1MTc2MTgzNn0.FTv4uYbwc5hD0StPlq2293NkWrd8wosHTuCKP3nHZAg
 @userToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjE5LCJlbWFpbCI6InRlbkBleGFtcGxlLmNvbSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzUxNDU0MjMyLCJleHAiOjE3NTE0NTc4MzJ9.4-loc3xi9kvriyaGWLYdeMeobGdAq0Om8p2U7GhYXMA
 @driverToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjE0LCJlbWFpbCI6Im5qb3JvZ2VAZXhhbXBsZS5jb20iLCJyb2xlIjoiZHJpdmVyIiwiaWF0IjoxNzUxMzcxNjY0LCJleHAiOjE3NTEzNzUyNjR9.Kw2vbyXeVShn2ALipTWDXyAnJiS0rwXKjxxNyNWEZso
 
@@ -17,23 +17,23 @@ POST {{url}}/seed/payments
 POST {{url}}/seed/orders
 
 ### get users by id
-GET {{url}}/users/2
+GET {{url}}/users/23
 Authorization: Bearer {{adminToken}}
 ### create a new user
-POST {{url}}/users
+POST {{url}}/auth/register
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
 {
-  "email": "njoroge@example.com",
-  "fullName": "abi Doe",
+  "email": "kuriaj@example.com",
+  "fullName": "kuria mary",
   "address": "789 Oak St, City, Country",
   "password": "password123",
   "phoneNumber": "555-555-5555",
-  "role": "driver"
+  "role": "user"
 }
 ### update a user
-PUT {{url}}/users/10
+PUT {{url}}/users/23
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
@@ -41,8 +41,8 @@ Content-Type: application/json
   "email": "kimani@example.com",
   "fullName": "Kimani ichungwa",
   "address": "789 Oak St, City, Country",
-  "password": "password123",
-  "phoneNumber": "555-555-5555",
+  "password": "Password123",
+  "phoneNumber": "+254703498941",
   "role": "driver"
 }
 ### delete a user
@@ -88,7 +88,7 @@ GET {{url}}/products
 Authorization: Bearer {{adminToken}}
 
 ### Get product by id (public access)
-GET {{url}}/products/1
+GET {{url}}/products/4
 
 ### Create a new product (admin only)
 POST {{url}}/products

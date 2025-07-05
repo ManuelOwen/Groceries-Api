@@ -43,8 +43,9 @@ export class OrdersController {
   }
 
   // get all orders
+  @Public()
   @Get()
-  @Roles(Role.ADMIN, Role.DRIVER) // Admins and drivers can view all orders
+  // @Roles(Role.ADMIN, Role.DRIVER) // Admins and drivers can view all orders
   async findAll(): Promise<ApiResponse<Order[]>> {
     return this.ordersService.findAll();
   }

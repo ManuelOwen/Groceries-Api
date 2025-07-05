@@ -11,6 +11,10 @@ interface UserRequest extends Request {
     email: string;
     role: Role;
     fullName: string;
+    address: string;
+    phoneNumber: string;
+    created_at: Date;
+    updated_at: Date;
   };
 }
 
@@ -24,6 +28,7 @@ export class RolesGuard implements CanActivate {
       context.getClass(),
     ]);
     console.log('🔍 RolesGuard - Required roles:', requiredRoles);
+    console.log('🔍 RolesGuard - Required roles types:', requiredRoles?.map(r => typeof r));
     
     if (!requiredRoles) {
       console.log('✅ No roles required, allowing access');
@@ -33,15 +38,21 @@ export class RolesGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<UserRequest>();
     const user = request.user;
     console.log('👤 User from request:', user);
+    console.log('👤 User role type:', typeof user?.role);
+    console.log('👤 User role value:', user?.role);
     
     if (!user) {
       console.log('❌ No user in request');
       return false;
     }
     
-    // Since AtStrategy now returns the full user object, we can use it directly
-    const hasRole = requiredRoles.some((role) => user.role === role);
-    console.log('🔐 Role check:', user.role, 'in', requiredRoles, '=', hasRole);
+    // Compare the user's role with required roles
+    const hasRole = requiredRoles.some((role) => {
+      const comparison = user.role === role;
+      console.log(`🔐 Role comparison: ${user.role} === ${role} = ${comparison}`);
+      return comparison;
+    });
+    console.log('🔐 Final role check result:', hasRole);
     return hasRole;
   }
 }

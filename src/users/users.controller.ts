@@ -3,10 +3,10 @@ import {
   Get,
   Post,
   Body,
-  Patch,
+  // Patch,
   Param,
   Delete,
-  Query,
+  // Query,
   UseGuards,
   Put,
   ParseIntPipe,
@@ -40,14 +40,14 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
   //  create user
   @Post()
-  // @Public()
+  @Roles(Role.ADMIN, Role.USER) // Only admins can create users via this endpoint
   create(@Body() createUserDto: CreateUserDto): Promise<ApiResponse<User>> {
     return this.usersService.createUser(createUserDto);
   }
   // get all users
-  @Roles(Role.ADMIN)
-  // @Public()
   @Get()
+  @Public()
+  // @Roles(Role.ADMIN) // Only admins can see all users
   async findAllUsers(): Promise<ApiResponse<User[]>> {
     return this.usersService.findAll();
   }
@@ -59,7 +59,7 @@ export class UsersController {
   }
   //  update user by id
   @Put(':id')
- 
+  @Roles(Role.ADMIN, Role.USER) // Admins can update any user, users can update themselves (logic in service)
   async updateUser(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
@@ -68,7 +68,7 @@ export class UsersController {
   }
 
   @Delete(':id')
-  // @Public()
+  @Roles(Role.ADMIN) // Only admins can delete users
   async deleteUser(@Param('id', ParseIntPipe) id: number): Promise<ApiResponse<null>> {
     return this.usersService.deleteUser(id);
   }

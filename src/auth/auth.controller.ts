@@ -10,7 +10,8 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import { CreateAuthDto } from './dto/login.dto';
+import { LoginDto } from './dto/login.dto';
+import { CreateAuthDto } from './dto/create-auth.dto';
 import { Request } from 'express';
 import { AuthService } from './auth.service';
 import { Public } from './decorators/public.decorator';
@@ -32,8 +33,14 @@ export class AuthController {
   // /auth/login
   @Public()
   @Post('login')
-  signInLocal(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.signIn(createAuthDto);
+  signInLocal(@Body() loginDto: LoginDto) {
+    return this.authService.signIn(loginDto);
+  }
+  // auth/register
+  @Public()
+  @Post('register')
+  register(@Body() createAuthDto: CreateAuthDto) {
+    return this.authService.register(createAuthDto);
   }
 
   // /auth/signout/:id

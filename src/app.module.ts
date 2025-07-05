@@ -32,7 +32,7 @@ import { CustomersSupportModule } from './customers-support/customers-support.mo
     ThrottlerModule.forRoot([
       {
         ttl: 60_000, // 1 minute in milliseconds
-        limit: 10,   // 10 requests per minute
+        limit: 20,   // 20 requests per minute
       },
     ]),
     SeedModule,

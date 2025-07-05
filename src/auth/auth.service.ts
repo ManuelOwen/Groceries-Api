@@ -2,17 +2,24 @@ import {
   Injectable,
   NotFoundException,
   UnauthorizedException,
+  ConflictException,
+  BadRequestException,
+  InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
-import { CreateAuthDto } from './dto/login.dto';
+import { CreateAuthDto } from './dto/create-auth.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role, User } from 'src/users/entities/user.entity';
-import { Repository } from 'typeorm';
+import { Repository, QueryFailedError } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
     private jwtService: JwtService,
@@ -93,12 +100,183 @@ export class AuthService {
       throw error;
     }
   }
+  // Method to register a new user
+  async register(createAuthDto: CreateAuthDto) {
+    const { email, password, fullName, address, phoneNumber } = createAuthDto;
+    
+    try {
+      // Input validation
+      if (!email || !password || !fullName || !address || !phoneNumber) {
+        this.logger.warn(`Invalid input data for user registration: ${JSON.stringify({ 
+          email: !!email, 
+          password: !!password, 
+          fullName: !!fullName, 
+          address: !!address, 
+          phoneNumber: !!phoneNumber 
+        })}`);
+        throw new BadRequestException('Email, password, full name, address, and phone number are required');
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        this.logger.warn(`Invalid email format provided during registration: ${email}`);
+        throw new BadRequestException('Invalid email format');
+      }
+
+      // Validate password strength
+      if (password.length < 6) {
+        this.logger.warn('Password too short during registration');
+        throw new BadRequestException('Password must be at least 6 characters long');
+      }
+
+      // Check if user already exists
+      this.logger.log(`Checking if user exists during registration with email: ${email}`);
+      const existingUser = await this.userRepository.findOne({
+        where: { email: email.toLowerCase().trim() },
+      });
+
+      if (existingUser) {
+        this.logger.warn(`Registration attempt with existing email: ${email}`);
+        throw new ConflictException({
+          message: 'A user with this email address already exists',
+          email: email,
+          suggestion: 'Please use a different email address or try logging in',
+        });
+      }
+
+      // Check if phone number already exists
+      if (phoneNumber) {
+        this.logger.log(`Checking if phone number exists during registration: ${phoneNumber}`);
+        const existingPhoneUser = await this.userRepository.findOne({
+          where: { phoneNumber: phoneNumber.trim() },
+        });
+
+        if (existingPhoneUser) {
+          this.logger.warn(`Registration attempt with existing phone number: ${phoneNumber}`);
+          throw new ConflictException({
+            message: 'A user with this phone number already exists',
+            phoneNumber: phoneNumber,
+            suggestion: 'Please use a different phone number',
+          });
+        }
+      }
+
+      // Hash password with error handling
+      let hashedPassword: string;
+      try {
+        hashedPassword = await this.hashData(password);
+      } catch (hashError) {
+        this.logger.error('Password hashing failed during registration', hashError.stack);
+        throw new InternalServerErrorException('Failed to secure password');
+      }
+
+      // Create user entity with sanitized data
+      const userData = {
+        email: email.toLowerCase().trim(),
+        password: hashedPassword,
+        fullName: fullName.trim(),
+        address: address.trim(),
+        phoneNumber: phoneNumber.trim(),
+        role: createAuthDto.role || Role.USER, // Default to USER role if not specified
+      };
+
+      const newUser = this.userRepository.create(userData);
+
+      // Save user with comprehensive error handling
+      let savedUser: User;
+      try {
+        savedUser = await this.userRepository.save(newUser);
+        this.logger.log(`User registered successfully with ID: ${savedUser.id}, Email: ${savedUser.email}`);
+      } catch (saveError) {
+        // Handle specific database errors
+        if (saveError instanceof QueryFailedError) {
+          // PostgreSQL unique constraint violation
+          if (saveError.message.includes('duplicate key value violates unique constraint')) {
+            if (saveError.message.includes('email')) {
+              this.logger.warn(`Database unique constraint violation during registration for email: ${email}`);
+              throw new ConflictException({
+                message: 'Email address is already registered',
+                email: email,
+                suggestion: 'Please use a different email address or try logging in',
+              });
+            }
+            if (saveError.message.includes('phone')) {
+              this.logger.warn(`Database unique constraint violation during registration for phone: ${phoneNumber}`);
+              throw new ConflictException({
+                message: 'Phone number is already registered',
+                phoneNumber: phoneNumber,
+                suggestion: 'Please use a different phone number',
+              });
+            }
+          }
+          
+          // Handle other database constraints
+          if (saveError.message.includes('not-null constraint')) {
+            this.logger.error('Required field missing during user registration', saveError.message);
+            throw new BadRequestException('Required fields are missing');
+          }
+        }
+
+        // Log the full error for debugging
+        this.logger.error('Database save operation failed during registration', {
+          error: saveError.message,
+          stack: saveError.stack,
+          userData: { email, fullName, phoneNumber },
+        });
+        
+        throw new InternalServerErrorException({
+          message: 'Failed to create user account',
+          suggestion: 'Please try again later or contact support if the problem persists',
+        });
+      }
+
+      return {
+        success: true,
+        message: 'User registered successfully',
+        data: {
+          id: savedUser.id,
+          email: savedUser.email,
+          role: savedUser.role,
+        },
+      };
+      
+    } catch (error) {
+      // Re-throw known exceptions
+      if (
+        error instanceof ConflictException ||
+        error instanceof BadRequestException ||
+        error instanceof InternalServerErrorException
+      ) {
+        throw error;
+      }
+
+      // Handle unexpected errors
+      this.logger.error('Unexpected error during user registration', {
+        error: error.message,
+        stack: error.stack,
+        userData: { email, fullName, phoneNumber },
+      });
+      this.logger.error('Unexpected error during user registration', {
+        error: error.message,
+        stack: error.stack,
+        userData: { email },
+      });
+
+      throw new InternalServerErrorException({
+        message: 'An unexpected error occurred while creating the user account',
+        suggestion: 'Please try again later or contact support',
+      });
+    }
+  }
+  
 
   // Method to sign in the user
-  async signIn(createAuthDto: CreateAuthDto) {
+  async signIn(createAuthDto: LoginDto) {
     const foundUser = await this.userRepository.findOne({
       where: { email: createAuthDto.email },
       select: ['id', 'email', 'password', 'role'], // role included for authorization
+      
     });
     if (!foundUser) {
       throw new NotFoundException(
@@ -125,9 +303,11 @@ export class AuthService {
     
     await this.saveRefreshToken(foundUser.id, refreshToken);
     console.log('Refresh token saved successfully');
-    
-    return { accessToken, refreshToken };
+    console.log(foundUser)
+    return { accessToken, refreshToken, role: foundUser.role,id:foundUser.id};
+
   }
+
 
   // Method to sign out the user
   async signOut(id: number) {
@@ -171,6 +351,6 @@ export class AuthService {
       foundUser.role,
     );
     await this.saveRefreshToken(foundUser.id, newRefreshToken);
-    return { accessToken, refreshToken: newRefreshToken };
+    return { accessToken, refreshToken: newRefreshToken};
   }
 }

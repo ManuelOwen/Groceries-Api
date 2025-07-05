@@ -33,7 +33,7 @@ export class User {
   })
   updated_at: Date;
 
-  @Column()
+  @Column({ unique: true })
   phoneNumber: string;
 
   @Column({ type: 'varchar', nullable: true })
