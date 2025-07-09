@@ -74,27 +74,29 @@ export class AuthService {
     try {
       console.log(`Saving refresh token for user ID: ${id}`);
       console.log(`Original refresh token: ${refreshToken}`);
-      
+
       const hashedRefreshToken = await this.hashData(refreshToken);
       console.log(`Hashed refresh token: ${hashedRefreshToken}`);
-      
+
       const result = await this.userRepository.update(id, {
         hashedRefreshToken: hashedRefreshToken,
       });
-      
+
       console.log(`Update result:`, result);
-      
+
       if (result.affected === 0) {
         throw new Error(`No user found with ID ${id} to update refresh token`);
       }
-      
+
       // Verify the token was saved
       const updatedUser = await this.userRepository.findOne({
         where: { id },
-        select: ['id', 'hashedRefreshToken']
+        select: ['id', 'hashedRefreshToken'],
       });
-      console.log(`Verification - User ${id} hashedRefreshToken:`, updatedUser?.hashedRefreshToken);
-      
+      console.log(
+        `Verification - User ${id} hashedRefreshToken:`,
+        updatedUser?.hashedRefreshToken,
+      );
     } catch (error) {
       console.error('Error saving refresh token:', error);
       throw error;
@@ -103,35 +105,45 @@ export class AuthService {
   // Method to register a new user
   async register(createAuthDto: CreateAuthDto) {
     const { email, password, fullName, address, phoneNumber } = createAuthDto;
-    
+
     try {
       // Input validation
       if (!email || !password || !fullName || !address || !phoneNumber) {
-        this.logger.warn(`Invalid input data for user registration: ${JSON.stringify({ 
-          email: !!email, 
-          password: !!password, 
-          fullName: !!fullName, 
-          address: !!address, 
-          phoneNumber: !!phoneNumber 
-        })}`);
-        throw new BadRequestException('Email, password, full name, address, and phone number are required');
+        this.logger.warn(
+          `Invalid input data for user registration: ${JSON.stringify({
+            email: !!email,
+            password: !!password,
+            fullName: !!fullName,
+            address: !!address,
+            phoneNumber: !!phoneNumber,
+          })}`,
+        );
+        throw new BadRequestException(
+          'Email, password, full name, address, and phone number are required',
+        );
       }
 
       // Validate email format
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
-        this.logger.warn(`Invalid email format provided during registration: ${email}`);
+        this.logger.warn(
+          `Invalid email format provided during registration: ${email}`,
+        );
         throw new BadRequestException('Invalid email format');
       }
 
       // Validate password strength
       if (password.length < 6) {
         this.logger.warn('Password too short during registration');
-        throw new BadRequestException('Password must be at least 6 characters long');
+        throw new BadRequestException(
+          'Password must be at least 6 characters long',
+        );
       }
 
       // Check if user already exists
-      this.logger.log(`Checking if user exists during registration with email: ${email}`);
+      this.logger.log(
+        `Checking if user exists during registration with email: ${email}`,
+      );
       const existingUser = await this.userRepository.findOne({
         where: { email: email.toLowerCase().trim() },
       });
@@ -147,13 +159,17 @@ export class AuthService {
 
       // Check if phone number already exists
       if (phoneNumber) {
-        this.logger.log(`Checking if phone number exists during registration: ${phoneNumber}`);
+        this.logger.log(
+          `Checking if phone number exists during registration: ${phoneNumber}`,
+        );
         const existingPhoneUser = await this.userRepository.findOne({
           where: { phoneNumber: phoneNumber.trim() },
         });
 
         if (existingPhoneUser) {
-          this.logger.warn(`Registration attempt with existing phone number: ${phoneNumber}`);
+          this.logger.warn(
+            `Registration attempt with existing phone number: ${phoneNumber}`,
+          );
           throw new ConflictException({
             message: 'A user with this phone number already exists',
             phoneNumber: phoneNumber,
@@ -167,7 +183,10 @@ export class AuthService {
       try {
         hashedPassword = await this.hashData(password);
       } catch (hashError) {
-        this.logger.error('Password hashing failed during registration', hashError.stack);
+        this.logger.error(
+          'Password hashing failed during registration',
+          hashError.stack,
+        );
         throw new InternalServerErrorException('Failed to secure password');
       }
 
@@ -187,22 +206,33 @@ export class AuthService {
       let savedUser: User;
       try {
         savedUser = await this.userRepository.save(newUser);
-        this.logger.log(`User registered successfully with ID: ${savedUser.id}, Email: ${savedUser.email}`);
+        this.logger.log(
+          `User registered successfully with ID: ${savedUser.id}, Email: ${savedUser.email}`,
+        );
       } catch (saveError) {
         // Handle specific database errors
         if (saveError instanceof QueryFailedError) {
           // PostgreSQL unique constraint violation
-          if (saveError.message.includes('duplicate key value violates unique constraint')) {
+          if (
+            saveError.message.includes(
+              'duplicate key value violates unique constraint',
+            )
+          ) {
             if (saveError.message.includes('email')) {
-              this.logger.warn(`Database unique constraint violation during registration for email: ${email}`);
+              this.logger.warn(
+                `Database unique constraint violation during registration for email: ${email}`,
+              );
               throw new ConflictException({
                 message: 'Email address is already registered',
                 email: email,
-                suggestion: 'Please use a different email address or try logging in',
+                suggestion:
+                  'Please use a different email address or try logging in',
               });
             }
             if (saveError.message.includes('phone')) {
-              this.logger.warn(`Database unique constraint violation during registration for phone: ${phoneNumber}`);
+              this.logger.warn(
+                `Database unique constraint violation during registration for phone: ${phoneNumber}`,
+              );
               throw new ConflictException({
                 message: 'Phone number is already registered',
                 phoneNumber: phoneNumber,
@@ -210,24 +240,31 @@ export class AuthService {
               });
             }
           }
-          
+
           // Handle other database constraints
           if (saveError.message.includes('not-null constraint')) {
-            this.logger.error('Required field missing during user registration', saveError.message);
+            this.logger.error(
+              'Required field missing during user registration',
+              saveError.message,
+            );
             throw new BadRequestException('Required fields are missing');
           }
         }
 
         // Log the full error for debugging
-        this.logger.error('Database save operation failed during registration', {
-          error: saveError.message,
-          stack: saveError.stack,
-          userData: { email, fullName, phoneNumber },
-        });
-        
+        this.logger.error(
+          'Database save operation failed during registration',
+          {
+            error: saveError.message,
+            stack: saveError.stack,
+            userData: { email, fullName, phoneNumber },
+          },
+        );
+
         throw new InternalServerErrorException({
           message: 'Failed to create user account',
-          suggestion: 'Please try again later or contact support if the problem persists',
+          suggestion:
+            'Please try again later or contact support if the problem persists',
         });
       }
 
@@ -240,7 +277,6 @@ export class AuthService {
           role: savedUser.role,
         },
       };
-      
     } catch (error) {
       // Re-throw known exceptions
       if (
@@ -269,14 +305,12 @@ export class AuthService {
       });
     }
   }
-  
 
   // Method to sign in the user
   async signIn(createAuthDto: LoginDto) {
     const foundUser = await this.userRepository.findOne({
       where: { email: createAuthDto.email },
       select: ['id', 'email', 'password', 'role'], // role included for authorization
-      
     });
     if (!foundUser) {
       throw new NotFoundException(
@@ -296,18 +330,21 @@ export class AuthService {
       foundUser.email,
       foundUser.role,
     );
-    console.log(`Generated tokens for user ${foundUser.id}:`, { 
-      accessTokenLength: accessToken.length, 
-      refreshTokenLength: refreshToken.length 
+    console.log(`Generated tokens for user ${foundUser.id}:`, {
+      accessTokenLength: accessToken.length,
+      refreshTokenLength: refreshToken.length,
     });
-    
+
     await this.saveRefreshToken(foundUser.id, refreshToken);
     console.log('Refresh token saved successfully');
-    console.log(foundUser)
-    return { accessToken, refreshToken, role: foundUser.role,id:foundUser.id};
-
+    console.log(foundUser);
+    return {
+      accessToken,
+      refreshToken,
+      role: foundUser.role,
+      id: foundUser.id,
+    };
   }
-
 
   // Method to sign out the user
   async signOut(id: number) {
@@ -325,7 +362,7 @@ export class AuthService {
   // Method to refresh tokens
   async refreshTokens(id: number, refreshToken: string) {
     const foundUser = await this.userRepository.findOne({
-      where: {id: id },
+      where: { id: id },
       select: ['id', 'email', 'role', 'hashedRefreshToken'],
     });
 
@@ -351,6 +388,6 @@ export class AuthService {
       foundUser.role,
     );
     await this.saveRefreshToken(foundUser.id, newRefreshToken);
-    return { accessToken, refreshToken: newRefreshToken};
+    return { accessToken, refreshToken: newRefreshToken };
   }
 }

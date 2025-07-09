@@ -35,13 +35,16 @@ export class CreateUserDto {
   @MinLength(6, { message: 'Password must be at least 6 characters long' })
   @MaxLength(128, { message: 'Password must not exceed 128 characters' })
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, {
-    message: 'Password must contain at least one lowercase letter, one uppercase letter, and one number',
+    message:
+      'Password must contain at least one lowercase letter, one uppercase letter, and one number',
   })
   password: string;
 
   @IsString()
   @IsNotEmpty({ message: 'Phone number is required' })
-  @Matches(/^[\+]?[1-9][\d]{0,15}$/, { message: 'Please provide a valid phone number' })
+  @Matches(/^[\+]?[1-9][\d]{0,15}$/, {
+    message: 'Please provide a valid phone number',
+  })
   phoneNumber: string;
 
   @IsEnum(Role, { message: 'Role must be a valid role (admin, user, driver)' })

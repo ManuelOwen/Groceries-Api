@@ -10,7 +10,16 @@ import { CustomersSupport } from 'src/customers-support/entities/customers-suppo
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Location, Payment, Order, Feedback, CustomersSupport])],
+  imports: [
+    TypeOrmModule.forFeature([
+      User,
+      Location,
+      Payment,
+      Order,
+      Feedback,
+      CustomersSupport,
+    ]),
+  ],
   controllers: [SeedController],
   providers: [SeedService],
 })

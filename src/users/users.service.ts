@@ -33,12 +33,16 @@ export class UsersService {
   // create user
   async createUser(createUserDto: CreateUserDto): Promise<ApiResponse<User>> {
     const { email, password, fullName, phoneNumber } = createUserDto;
-    
+
     try {
       // Input validation
       if (!email || !password || !fullName) {
-        this.logger.warn(`Invalid input data for user creation: ${JSON.stringify({ email: !!email, password: !!password, fullName: !!fullName })}`);
-        throw new BadRequestException('Email, password, and full name are required');
+        this.logger.warn(
+          `Invalid input data for user creation: ${JSON.stringify({ email: !!email, password: !!password, fullName: !!fullName })}`,
+        );
+        throw new BadRequestException(
+          'Email, password, and full name are required',
+        );
       }
 
       // Validate email format
@@ -51,7 +55,9 @@ export class UsersService {
       // Validate password strength
       if (password.length < 6) {
         this.logger.warn('Password too short');
-        throw new BadRequestException('Password must be at least 6 characters long');
+        throw new BadRequestException(
+          'Password must be at least 6 characters long',
+        );
       }
 
       // Check if user already exists with detailed logging
@@ -61,7 +67,9 @@ export class UsersService {
       });
 
       if (existingUser) {
-        this.logger.warn(`User registration attempt with existing email: ${email}`);
+        this.logger.warn(
+          `User registration attempt with existing email: ${email}`,
+        );
         throw new ConflictException({
           message: 'A user with this email address already exists',
           email: email,
@@ -77,7 +85,9 @@ export class UsersService {
         });
 
         if (existingPhoneUser) {
-          this.logger.warn(`User registration attempt with existing phone number: ${phoneNumber}`);
+          this.logger.warn(
+            `User registration attempt with existing phone number: ${phoneNumber}`,
+          );
           throw new ConflictException({
             message: 'A user with this phone number already exists',
             phoneNumber: phoneNumber,
@@ -111,14 +121,22 @@ export class UsersService {
       let savedUser: User;
       try {
         savedUser = await this.userRepository.save(newUser);
-        this.logger.log(`User created successfully with ID: ${savedUser.id}, Email: ${savedUser.email}`);
+        this.logger.log(
+          `User created successfully with ID: ${savedUser.id}, Email: ${savedUser.email}`,
+        );
       } catch (saveError) {
         // Handle specific database errors
         if (saveError instanceof QueryFailedError) {
           // PostgreSQL unique constraint violation
-          if (saveError.message.includes('duplicate key value violates unique constraint')) {
+          if (
+            saveError.message.includes(
+              'duplicate key value violates unique constraint',
+            )
+          ) {
             if (saveError.message.includes('email')) {
-              this.logger.warn(`Database unique constraint violation for email: ${email}`);
+              this.logger.warn(
+                `Database unique constraint violation for email: ${email}`,
+              );
               throw new ConflictException({
                 message: 'Email address is already registered',
                 email: email,
@@ -126,7 +144,9 @@ export class UsersService {
               });
             }
             if (saveError.message.includes('phone')) {
-              this.logger.warn(`Database unique constraint violation for phone: ${phoneNumber}`);
+              this.logger.warn(
+                `Database unique constraint violation for phone: ${phoneNumber}`,
+              );
               throw new ConflictException({
                 message: 'Phone number is already registered',
                 phoneNumber: phoneNumber,
@@ -134,10 +154,13 @@ export class UsersService {
               });
             }
           }
-          
+
           // Handle other database constraints
           if (saveError.message.includes('not-null constraint')) {
-            this.logger.error('Required field missing during user creation', saveError.message);
+            this.logger.error(
+              'Required field missing during user creation',
+              saveError.message,
+            );
             throw new BadRequestException('Required fields are missing');
           }
         }
@@ -148,10 +171,11 @@ export class UsersService {
           stack: saveError.stack,
           userData: { email, fullName, phoneNumber },
         });
-        
+
         throw new InternalServerErrorException({
           message: 'Failed to create user account',
-          suggestion: 'Please try again later or contact support if the problem persists',
+          suggestion:
+            'Please try again later or contact support if the problem persists',
         });
       }
 
@@ -163,7 +187,6 @@ export class UsersService {
         message: 'User account created successfully',
         data: userWithoutPassword as User,
       };
-      
     } catch (error) {
       // Re-throw known exceptions
       if (
@@ -191,7 +214,7 @@ export class UsersService {
   async findAll(): Promise<ApiResponse<User[]>> {
     try {
       this.logger.log('Fetching all users');
-      
+
       const users = await this.userRepository.find({
         select: [
           'id',
@@ -234,7 +257,7 @@ export class UsersService {
       }
 
       this.logger.log(`Fetching user with ID: ${id}`);
-      
+
       const user = await this.userRepository.findOne({
         where: { id },
         select: [
@@ -266,7 +289,10 @@ export class UsersService {
         data: user,
       };
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
         throw error;
       }
 
@@ -317,9 +343,11 @@ export class UsersService {
         const emailExists = await this.userRepository.findOne({
           where: { email: updateUserDto.email.toLowerCase().trim() },
         });
-        
+
         if (emailExists) {
-          this.logger.warn(`Email conflict during update for user ID: ${id}, email: ${updateUserDto.email}`);
+          this.logger.warn(
+            `Email conflict during update for user ID: ${id}, email: ${updateUserDto.email}`,
+          );
           throw new ConflictException({
             message: 'Email address is already in use by another user',
             email: updateUserDto.email,
@@ -330,15 +358,20 @@ export class UsersService {
 
       // Prepare update data
       const updateData = { ...updateUserDto };
-      
+
       // If password is being updated, hash it
       if (updateUserDto.password) {
         try {
           updateData.password = await bcrypt.hash(updateUserDto.password, 12);
           this.logger.log(`Password updated for user ID: ${id}`);
         } catch (hashError) {
-          this.logger.error('Password hashing failed during update', hashError.stack);
-          throw new InternalServerErrorException('Failed to secure new password');
+          this.logger.error(
+            'Password hashing failed during update',
+            hashError.stack,
+          );
+          throw new InternalServerErrorException(
+            'Failed to secure new password',
+          );
         }
       }
 
@@ -366,7 +399,9 @@ export class UsersService {
           error: preloadError.message,
           userId: id,
         });
-        throw new InternalServerErrorException('Failed to prepare user data for update');
+        throw new InternalServerErrorException(
+          'Failed to prepare user data for update',
+        );
       }
 
       if (!userToUpdate) {
@@ -384,9 +419,15 @@ export class UsersService {
       } catch (saveError) {
         // Handle specific database errors
         if (saveError instanceof QueryFailedError) {
-          if (saveError.message.includes('duplicate key value violates unique constraint')) {
+          if (
+            saveError.message.includes(
+              'duplicate key value violates unique constraint',
+            )
+          ) {
             if (saveError.message.includes('email')) {
-              this.logger.warn(`Database unique constraint violation during update for email: ${updateData.email}`);
+              this.logger.warn(
+                `Database unique constraint violation during update for email: ${updateData.email}`,
+              );
               throw new ConflictException({
                 message: 'Email address is already registered',
                 email: updateData.email,
@@ -401,7 +442,7 @@ export class UsersService {
           stack: saveError.stack,
           userId: id,
         });
-        
+
         throw new InternalServerErrorException({
           message: 'Failed to save user updates',
           suggestion: 'Please try again later or contact support',
@@ -476,7 +517,9 @@ export class UsersService {
         // Handle foreign key constraint violations
         if (deleteError instanceof QueryFailedError) {
           if (deleteError.message.includes('foreign key constraint')) {
-            this.logger.warn(`Cannot delete user due to foreign key constraints, ID: ${id}`);
+            this.logger.warn(
+              `Cannot delete user due to foreign key constraints, ID: ${id}`,
+            );
             throw new ConflictException({
               message: 'Cannot delete user as they have associated records',
               suggestion: 'Please ensure all related data is removed first',
@@ -489,7 +532,7 @@ export class UsersService {
           stack: deleteError.stack,
           userId: id,
         });
-        
+
         throw new InternalServerErrorException({
           message: 'Failed to delete user',
           suggestion: 'Please try again later or contact support',
@@ -497,7 +540,9 @@ export class UsersService {
       }
 
       if (deleteResult.affected === 0) {
-        this.logger.error(`Delete operation affected 0 rows for user ID: ${id}`);
+        this.logger.error(
+          `Delete operation affected 0 rows for user ID: ${id}`,
+        );
         throw new InternalServerErrorException({
           message: `Failed to delete user with ID ${id}`,
           suggestion: 'User may have been deleted by another process',
@@ -521,11 +566,14 @@ export class UsersService {
         throw error;
       }
 
-      this.logger.error(`Unexpected error during user deletion with ID: ${id}`, {
-        error: error.message,
-        stack: error.stack,
-        userId: id,
-      });
+      this.logger.error(
+        `Unexpected error during user deletion with ID: ${id}`,
+        {
+          error: error.message,
+          stack: error.stack,
+          userId: id,
+        },
+      );
 
       throw new InternalServerErrorException({
         message: `Failed to delete user with ID ${id}`,

@@ -20,7 +20,6 @@ import { RolesGuard } from 'src/auth/guards';
 import { AtGuard } from 'src/auth/token/token.guard';
 import { Public, Roles } from 'src/auth/decorators';
 
-
 // Define ApiResponse interface to match the service
 interface ApiResponse<T = any> {
   success: boolean;
@@ -29,18 +28,15 @@ interface ApiResponse<T = any> {
   error?: string;
 }
 
-
-
-
 @Controller('users')
 @ApiBearerAuth()
-@UseGuards(AtGuard,RolesGuard) // Use AtGuard for authentication
-// Use RolesGuard for authorization     
+@UseGuards(AtGuard, RolesGuard) // Use AtGuard for authentication
+// Use RolesGuard for authorization
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
   //  create user
   @Post()
-  @Roles(Role.ADMIN, Role.USER) // Only admins can create users via this endpoint
+  @Public()
   create(@Body() createUserDto: CreateUserDto): Promise<ApiResponse<User>> {
     return this.usersService.createUser(createUserDto);
   }
@@ -54,7 +50,9 @@ export class UsersController {
   // get user by id
   @Get(':id')
   @Roles(Role.ADMIN)
-  async getUserById(@Param('id', ParseIntPipe) id: number): Promise<ApiResponse<User>> {
+  async getUserById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ApiResponse<User>> {
     return this.usersService.getUserById(id);
   }
   //  update user by id
@@ -69,7 +67,9 @@ export class UsersController {
 
   @Delete(':id')
   @Roles(Role.ADMIN) // Only admins can delete users
-  async deleteUser(@Param('id', ParseIntPipe) id: number): Promise<ApiResponse<null>> {
+  async deleteUser(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ApiResponse<null>> {
     return this.usersService.deleteUser(id);
   }
 }

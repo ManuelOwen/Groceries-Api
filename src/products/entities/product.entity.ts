@@ -5,6 +5,16 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
+export enum ProductCategory{
+  FRUIT = 'fruit',
+  VEGETABLE = 'vegetable',
+  DAIRY = 'dairy',
+  BAKERY = 'bakery',
+  MEAT = 'meat',
+  SEAFOOD = 'seafood',
+  BEVERAGE = 'beverage',
+  SNACK = 'snack',
+}
 
 @Entity('products')
 export class Product {
@@ -17,15 +27,14 @@ export class Product {
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   price: number;
 
-  @Column({ type: 'boolean', default: true })
-  availability: boolean;
+  @Column({ type: 'boolean', default: false })
+  inStock: boolean;
 
   @Column({ type: 'varchar', length: 100, nullable: true })
-  category: string;
+  category: ProductCategory;
 
   @Column({ type: 'varchar', length: 500, nullable: true })
   imageUrl: string;
-  
 
   @CreateDateColumn()
   created_at: Date;

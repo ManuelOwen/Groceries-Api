@@ -25,7 +25,9 @@ export class PaymentsService {
   ) {}
 
   // create payment
-  async createPayment(createPaymentDto: CreatePaymentDto): Promise<ApiResponse<Payment>> {
+  async createPayment(
+    createPaymentDto: CreatePaymentDto,
+  ): Promise<ApiResponse<Payment>> {
     try {
       const newPayment = this.paymentRepository.create(createPaymentDto);
       const savedPayment = await this.paymentRepository.save(newPayment);
@@ -115,7 +117,9 @@ export class PaymentsService {
   ): Promise<ApiResponse<Payment>> {
     try {
       // Check if payment exists
-      const existingPayment = await this.paymentRepository.findOne({ where: { id } });
+      const existingPayment = await this.paymentRepository.findOne({
+        where: { id },
+      });
       if (!existingPayment) {
         throw new NotFoundException(`Payment with id ${id} not found`);
       }
@@ -152,7 +156,9 @@ export class PaymentsService {
   async deletePayment(id: number): Promise<ApiResponse<null>> {
     try {
       // Check if payment exists first
-      const existingPayment = await this.paymentRepository.findOne({ where: { id } });
+      const existingPayment = await this.paymentRepository.findOne({
+        where: { id },
+      });
       if (!existingPayment) {
         throw new NotFoundException(`Payment with id ${id} not found`);
       }

@@ -25,7 +25,9 @@ export class FeedbacksService {
   ) {}
 
   // create feedback
-  async createFeedback(createFeedbackDto: CreateFeedbackDto): Promise<ApiResponse<Feedback>> {
+  async createFeedback(
+    createFeedbackDto: CreateFeedbackDto,
+  ): Promise<ApiResponse<Feedback>> {
     try {
       const newFeedback = this.feedbackRepository.create(createFeedbackDto);
       const savedFeedback = await this.feedbackRepository.save(newFeedback);
@@ -182,7 +184,9 @@ export class FeedbacksService {
   ): Promise<ApiResponse<Feedback>> {
     try {
       // Check if feedback exists
-      const existingFeedback = await this.feedbackRepository.findOne({ where: { id } });
+      const existingFeedback = await this.feedbackRepository.findOne({
+        where: { id },
+      });
       if (!existingFeedback) {
         throw new NotFoundException(`Feedback with id ${id} not found`);
       }
@@ -196,7 +200,8 @@ export class FeedbacksService {
         throw new NotFoundException(`Feedback with id ${id} not found`);
       }
 
-      const updatedFeedback = await this.feedbackRepository.save(feedbackToUpdate);
+      const updatedFeedback =
+        await this.feedbackRepository.save(feedbackToUpdate);
 
       return {
         success: true,
@@ -219,7 +224,9 @@ export class FeedbacksService {
   async deleteFeedback(id: number): Promise<ApiResponse<null>> {
     try {
       // Check if feedback exists first
-      const existingFeedback = await this.feedbackRepository.findOne({ where: { id } });
+      const existingFeedback = await this.feedbackRepository.findOne({
+        where: { id },
+      });
       if (!existingFeedback) {
         throw new NotFoundException(`Feedback with id ${id} not found`);
       }

@@ -35,8 +35,10 @@ export class FeedbacksController {
 
   // create feedback
   @Post()
-  @Roles(Role.USER, Role.ADMIN,Role.DRIVER) // Users and admins can create feedback
-  create(@Body() createFeedbackDto: CreateFeedbackDto): Promise<ApiResponse<Feedback>> {
+  @Roles(Role.USER, Role.ADMIN, Role.DRIVER) // Users and admins can create feedback
+  create(
+    @Body() createFeedbackDto: CreateFeedbackDto,
+  ): Promise<ApiResponse<Feedback>> {
     return this.feedbacksService.createFeedback(createFeedbackDto);
   }
 
@@ -50,21 +52,27 @@ export class FeedbacksController {
   // get feedback by id
   @Get(':id')
   @Roles(Role.ADMIN, Role.USER) // Admin can see all, users can see their own (to be enforced in service if needed)
-  async getFeedbackById(@Param('id', ParseIntPipe) id: number): Promise<ApiResponse<Feedback>> {
+  async getFeedbackById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ApiResponse<Feedback>> {
     return this.feedbacksService.getFeedbackById(id);
   }
 
   // get feedbacks by user id
   @Get('user/:userId')
   @Roles(Role.ADMIN, Role.USER) // Admin can see all, users can see their own
-  async getFeedbacksByUserId(@Param('userId', ParseIntPipe) userId: number): Promise<ApiResponse<Feedback[]>> {
+  async getFeedbacksByUserId(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<ApiResponse<Feedback[]>> {
     return this.feedbacksService.getFeedbacksByUserId(userId);
   }
 
   // get feedbacks by status (admin only)
   @Get('status/:status')
   @Roles(Role.ADMIN)
-  async getFeedbacksByStatus(@Param('status') status: string): Promise<ApiResponse<Feedback[]>> {
+  async getFeedbacksByStatus(
+    @Param('status') status: string,
+  ): Promise<ApiResponse<Feedback[]>> {
     return this.feedbacksService.getFeedbacksByStatus(status);
   }
 
@@ -81,7 +89,9 @@ export class FeedbacksController {
   // delete feedback by id (admin only)
   @Delete(':id')
   @Roles(Role.ADMIN)
-  async deleteFeedback(@Param('id', ParseIntPipe) id: number): Promise<ApiResponse<null>> {
+  async deleteFeedback(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ApiResponse<null>> {
     return this.feedbacksService.deleteFeedback(id);
   }
 }

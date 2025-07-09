@@ -26,7 +26,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       // Handle known HTTP exceptions
       status = exception.getStatus();
       const exceptionResponse = exception.getResponse();
-      
+
       if (typeof exceptionResponse === 'string') {
         message = exceptionResponse;
         error = exception.name;
@@ -37,12 +37,17 @@ export class AllExceptionsFilter implements ExceptionFilter {
     } else if (exception instanceof QueryFailedError) {
       // Handle database errors
       status = HttpStatus.BAD_REQUEST;
-      
-      if (exception.message.includes('duplicate key value violates unique constraint')) {
+
+      if (
+        exception.message.includes(
+          'duplicate key value violates unique constraint',
+        )
+      ) {
         if (exception.message.includes('email')) {
           message = {
             message: 'Email address is already registered',
-            suggestion: 'Please use a different email address or try logging in',
+            suggestion:
+              'Please use a different email address or try logging in',
           };
           error = 'Conflict';
           status = HttpStatus.CONFLICT;
@@ -70,7 +75,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
       } else if (exception.message.includes('foreign key constraint')) {
         message = {
           message: 'Cannot perform operation due to related data',
-          suggestion: 'Please ensure all related data is valid or remove dependencies first',
+          suggestion:
+            'Please ensure all related data is valid or remove dependencies first',
         };
         error = 'Conflict';
         status = HttpStatus.CONFLICT;
@@ -85,30 +91,29 @@ export class AllExceptionsFilter implements ExceptionFilter {
       // Handle unknown errors - already initialized above
       message = {
         message: 'Internal server error occurred',
-        suggestion: 'Please try again later or contact support if the problem persists',
+        suggestion:
+          'Please try again later or contact support if the problem persists',
       };
       error = 'Internal Server Error';
     }
 
     // Log the error for debugging
-    this.logger.error(
-      `${request.method} ${request.url} - Status: ${status}`,
-      {
-        exception: exception instanceof Error ? exception.message : String(exception),
-        stack: exception instanceof Error ? exception.stack : undefined,
-        request: {
-          method: request.method,
-          url: request.url,
-          body: request.body,
-          params: request.params,
-          query: request.query,
-          headers: {
-            'user-agent': request.get('user-agent'),
-            'content-type': request.get('content-type'),
-          },
+    this.logger.error(`${request.method} ${request.url} - Status: ${status}`, {
+      exception:
+        exception instanceof Error ? exception.message : String(exception),
+      stack: exception instanceof Error ? exception.stack : undefined,
+      request: {
+        method: request.method,
+        url: request.url,
+        body: request.body,
+        params: request.params,
+        query: request.query,
+        headers: {
+          'user-agent': request.get('user-agent'),
+          'content-type': request.get('content-type'),
         },
       },
-    );
+    });
 
     // Send error response
     response.status(status).json({

@@ -10,10 +10,10 @@ import {
   IsEmail,
   Matches,
 } from 'class-validator';
-import { 
-  SupportTicketStatus, 
-  SupportTicketPriority, 
-  SupportTicketCategory 
+import {
+  SupportTicketStatus,
+  SupportTicketPriority,
+  SupportTicketCategory,
 } from '../entities/customers-support.entity';
 
 export class CreateCustomersSupportDto {
@@ -54,12 +54,16 @@ export class CreateCustomersSupportDto {
 
   @IsString()
   @IsOptional()
-  @Matches(/^[\+]?[1-9][\d]{0,15}$/, { message: 'Please provide a valid phone number' })
+  @Matches(/^[\+]?[1-9][\d]{0,15}$/, {
+    message: 'Please provide a valid phone number',
+  })
   contact_phone?: string;
 
   @IsString()
   @IsOptional()
-  @MaxLength(2000, { message: 'Admin response must not exceed 2000 characters' })
+  @MaxLength(2000, {
+    message: 'Admin response must not exceed 2000 characters',
+  })
   admin_response?: string;
 
   @IsNumber()

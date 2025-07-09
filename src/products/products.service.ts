@@ -25,7 +25,9 @@ export class ProductsService {
   ) {}
 
   // create product
-  async create(createProductDto: CreateProductDto): Promise<ApiResponse<Product>> {
+  async create(
+    createProductDto: CreateProductDto,
+  ): Promise<ApiResponse<Product>> {
     try {
       // Check if product with same name already exists
       const existingProduct = await this.productRepository.findOne({
@@ -112,7 +114,9 @@ export class ProductsService {
   ): Promise<ApiResponse<Product>> {
     try {
       // Check if product exists
-      const existingProduct = await this.productRepository.findOne({ where: { id } });
+      const existingProduct = await this.productRepository.findOne({
+        where: { id },
+      });
       if (!existingProduct) {
         throw new NotFoundException(`Product with id ${id} not found`);
       }
@@ -149,7 +153,9 @@ export class ProductsService {
   async remove(id: number): Promise<ApiResponse<null>> {
     try {
       // Check if product exists first
-      const existingProduct = await this.productRepository.findOne({ where: { id } });
+      const existingProduct = await this.productRepository.findOne({
+        where: { id },
+      });
       if (!existingProduct) {
         throw new NotFoundException(`Product with id ${id} not found`);
       }

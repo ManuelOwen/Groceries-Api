@@ -31,13 +31,19 @@ interface ApiResponse<T = any> {
 @ApiBearerAuth()
 @UseGuards(AtGuard, RolesGuard) // Use AtGuard for authentication and RolesGuard for authorization
 export class CustomersSupportController {
-  constructor(private readonly customersSupportService: CustomersSupportService) {}
+  constructor(
+    private readonly customersSupportService: CustomersSupportService,
+  ) {}
 
   // create support ticket
   @Post()
   @Roles(Role.USER, Role.ADMIN) // Users and admins can create support tickets
-  create(@Body() createCustomersSupportDto: CreateCustomersSupportDto): Promise<ApiResponse<CustomersSupport>> {
-    return this.customersSupportService.createSupportTicket(createCustomersSupportDto);
+  create(
+    @Body() createCustomersSupportDto: CreateCustomersSupportDto,
+  ): Promise<ApiResponse<CustomersSupport>> {
+    return this.customersSupportService.createSupportTicket(
+      createCustomersSupportDto,
+    );
   }
 
   // get all support tickets (admin only)
@@ -50,21 +56,27 @@ export class CustomersSupportController {
   // get support ticket by id
   @Get(':id')
   @Roles(Role.ADMIN, Role.USER) // Admin can see all, users can see their own
-  async getSupportTicketById(@Param('id', ParseIntPipe) id: number): Promise<ApiResponse<CustomersSupport>> {
+  async getSupportTicketById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ApiResponse<CustomersSupport>> {
     return this.customersSupportService.getSupportTicketById(id);
   }
 
   // get support tickets by user id
   @Get('user/:userId')
   @Roles(Role.ADMIN, Role.USER) // Admin can see all, users can see their own
-  async getSupportTicketsByUserId(@Param('userId', ParseIntPipe) userId: number): Promise<ApiResponse<CustomersSupport[]>> {
+  async getSupportTicketsByUserId(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<ApiResponse<CustomersSupport[]>> {
     return this.customersSupportService.getSupportTicketsByUserId(userId);
   }
 
   // get support tickets by status (admin only)
   @Get('status/:status')
   @Roles(Role.ADMIN)
-  async getSupportTicketsByStatus(@Param('status') status: string): Promise<ApiResponse<CustomersSupport[]>> {
+  async getSupportTicketsByStatus(
+    @Param('status') status: string,
+  ): Promise<ApiResponse<CustomersSupport[]>> {
     return this.customersSupportService.getSupportTicketsByStatus(status);
   }
 
@@ -75,13 +87,18 @@ export class CustomersSupportController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCustomersSupportDto: UpdateCustomersSupportDto,
   ): Promise<ApiResponse<CustomersSupport>> {
-    return this.customersSupportService.updateSupportTicket(id, updateCustomersSupportDto);
+    return this.customersSupportService.updateSupportTicket(
+      id,
+      updateCustomersSupportDto,
+    );
   }
 
   // delete support ticket by id (admin only)
   @Delete(':id')
   @Roles(Role.ADMIN)
-  async deleteSupportTicket(@Param('id', ParseIntPipe) id: number): Promise<ApiResponse<null>> {
+  async deleteSupportTicket(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ApiResponse<null>> {
     return this.customersSupportService.deleteSupportTicket(id);
   }
 }

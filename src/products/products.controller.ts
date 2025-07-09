@@ -9,6 +9,8 @@ import {
   UseGuards,
   Put,
   ParseIntPipe,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -19,6 +21,9 @@ import { RolesGuard } from 'src/auth/guards';
 import { AtGuard } from 'src/auth/token/token.guard';
 import { Public, Roles } from 'src/auth/decorators';
 import { Role } from 'src/users/entities/user.entity';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 
 // Define ApiResponse interface to match the service
 interface ApiResponse<T = any> {
@@ -37,13 +42,15 @@ export class ProductsController {
   // Create product - only admins can create products
   @Post()
   @Roles(Role.ADMIN)
-  create(@Body() createProductDto: CreateProductDto): Promise<ApiResponse<Product>> {
+  create(
+    @Body() createProductDto: CreateProductDto,
+  ): Promise<ApiResponse<Product>> {
     return this.productsService.create(createProductDto);
   }
 
   // Get all products -
   @Get()
- @Public () // Allow both admins and users to access
+  @Public() // Allow both admins and users to access
   findAll(): Promise<ApiResponse<Product[]>> {
     return this.productsService.findAll();
   }
@@ -51,7 +58,9 @@ export class ProductsController {
   // Get product by id - public access
   @Get(':id')
   @Public()
-  findOne(@Param('id', ParseIntPipe) id: number): Promise<ApiResponse<Product>> {
+  findOne(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ApiResponse<Product>> {
     return this.productsService.findOne(id);
   }
 
@@ -70,5 +79,34 @@ export class ProductsController {
   @Roles(Role.ADMIN)
   remove(@Param('id', ParseIntPipe) id: number): Promise<ApiResponse<null>> {
     return this.productsService.remove(id);
+  }
+
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('file', {
+    storage: diskStorage({
+      destination: './uploads/products',
+      filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        cb(null, uniqueSuffix + extname(file.originalname));
+      },
+    }),
+    fileFilter: (req, file, cb) => {
+      if (!file.mimetype.match(/^image\/(jpg|jpeg|png|gif)$/)) {
+        return cb(new Error('Only image files are allowed!'), false);
+      }
+      cb(null, true);
+    },
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  }))
+  async uploadProductImage(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      return { success: false, message: 'No file uploaded' };
+    }
+    const imageUrl = `/uploads/products/${file.filename}`;
+    return {
+      success: true,
+      message: 'File uploaded successfully',
+      imageUrl,
+    };
   }
 }

@@ -1,4 +1,12 @@
-import { IsString, IsNotEmpty, IsNumber, IsOptional, Min, IsBoolean } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  Min,
+  IsBoolean,
+} from 'class-validator';
+import { ProductCategory } from '../entities/product.entity';
 
 export class CreateProductDto {
   @IsString()
@@ -10,11 +18,12 @@ export class CreateProductDto {
   price: number;
 
   @IsBoolean()
-  availability: boolean;
+  @IsOptional()
+  inStock?: boolean;
 
   @IsString()
   @IsOptional()
-  category?: string;
+  category?: ProductCategory;
 
   @IsString()
   @IsOptional()

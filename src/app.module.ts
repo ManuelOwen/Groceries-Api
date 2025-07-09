@@ -18,6 +18,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { OrdersModule } from './orders/orders.module';
 import { FeedbacksModule } from './feedbacks/feedbacks.module';
 import { CustomersSupportModule } from './customers-support/customers-support.module';
+import { DriversModule } from './drivers/drivers.module';
 
 @Module({
   imports: [
@@ -32,7 +33,7 @@ import { CustomersSupportModule } from './customers-support/customers-support.mo
     ThrottlerModule.forRoot([
       {
         ttl: 60_000, // 1 minute in milliseconds
-        limit: 20,   // 20 requests per minute
+        limit: 20, // 20 requests per minute
       },
     ]),
     SeedModule,
@@ -42,6 +43,7 @@ import { CustomersSupportModule } from './customers-support/customers-support.mo
     OrdersModule,
     FeedbacksModule,
     CustomersSupportModule,
+    DriversModule,
   ],
   controllers: [AppController],
   providers: [

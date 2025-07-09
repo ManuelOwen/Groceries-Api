@@ -28,28 +28,33 @@ export class RolesGuard implements CanActivate {
       context.getClass(),
     ]);
     console.log('🔍 RolesGuard - Required roles:', requiredRoles);
-    console.log('🔍 RolesGuard - Required roles types:', requiredRoles?.map(r => typeof r));
-    
+    console.log(
+      '🔍 RolesGuard - Required roles types:',
+      requiredRoles?.map((r) => typeof r),
+    );
+
     if (!requiredRoles) {
       console.log('✅ No roles required, allowing access');
       return true;
     }
-    
+
     const request = context.switchToHttp().getRequest<UserRequest>();
     const user = request.user;
     console.log('👤 User from request:', user);
     console.log('👤 User role type:', typeof user?.role);
     console.log('👤 User role value:', user?.role);
-    
+
     if (!user) {
       console.log('❌ No user in request');
       return false;
     }
-    
+
     // Compare the user's role with required roles
     const hasRole = requiredRoles.some((role) => {
       const comparison = user.role === role;
-      console.log(`🔐 Role comparison: ${user.role} === ${role} = ${comparison}`);
+      console.log(
+        `🔐 Role comparison: ${user.role} === ${role} = ${comparison}`,
+      );
       return comparison;
     });
     console.log('🔐 Final role check result:', hasRole);

@@ -37,7 +37,9 @@ export class LocationController {
   // create location
   @Post()
   @Roles(Role.ADMIN) // Only admins can create locations
-  create(@Body() createLocationDto: CreateLocationDto): Promise<ApiResponse<Location>> {
+  create(
+    @Body() createLocationDto: CreateLocationDto,
+  ): Promise<ApiResponse<Location>> {
     return this.locationService.createLocation(createLocationDto);
   }
 
@@ -51,7 +53,9 @@ export class LocationController {
   // get location by id
   @Get(':id')
   @Public() // Public endpoint - anyone can view a specific location
-  async findOne(@Param('id', ParseIntPipe) id: number): Promise<ApiResponse<Location>> {
+  async findOne(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ApiResponse<Location>> {
     return this.locationService.getLocationById(id);
   }
 
@@ -68,7 +72,9 @@ export class LocationController {
   // delete location by id
   @Delete(':id')
   @Roles(Role.ADMIN) // Only admins can delete locations
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<ApiResponse<null>> {
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ApiResponse<null>> {
     return this.locationService.deleteLocation(id);
   }
 }

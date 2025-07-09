@@ -39,6 +39,4 @@ export class CreateOrderDto {
   @IsString()
   @IsOptional()
   billing_address?: string;
-
- 
 }

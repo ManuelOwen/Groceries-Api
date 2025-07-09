@@ -25,7 +25,9 @@ export class OrdersService {
   ) {}
 
   // create order
-  async createOrder(createOrderDto: CreateOrderDto): Promise<ApiResponse<Order>> {
+  async createOrder(
+    createOrderDto: CreateOrderDto,
+  ): Promise<ApiResponse<Order>> {
     try {
       const newOrder = this.orderRepository.create(createOrderDto);
       const savedOrder = await this.orderRepository.save(newOrder);
@@ -115,16 +117,21 @@ export class OrdersService {
   ): Promise<ApiResponse<Order>> {
     try {
       // Check if order exists
-      const existingOrder = await this.orderRepository.findOne({ where: { id } });
+      const existingOrder = await this.orderRepository.findOne({
+        where: { id },
+      });
       if (!existingOrder) {
         throw new NotFoundException(`Order with id ${id} not found`);
       }
 
       // Handle status-specific updates (entity hooks will also handle this)
       const updateData = { ...updateOrderDto };
-      
+
       // Manual backup logic for timestamp setting (in case entity hooks don't fire)
-      if (updateOrderDto.status === OrderStatus.SHIPPED && !existingOrder.shipped_at) {
+      if (
+        updateOrderDto.status === OrderStatus.SHIPPED &&
+        !existingOrder.shipped_at
+      ) {
         updateData.shipped_at = new Date();
       }
       if (updateOrderDto.status === OrderStatus.DELIVERED) {
@@ -164,12 +171,14 @@ export class OrdersService {
       };
     }
   }
-//  find order by category
+  //  find order by category
   // delete order by id
   async deleteOrder(id: number): Promise<ApiResponse<null>> {
     try {
       // Check if order exists first
-      const existingOrder = await this.orderRepository.findOne({ where: { id } });
+      const existingOrder = await this.orderRepository.findOne({
+        where: { id },
+      });
       if (!existingOrder) {
         throw new NotFoundException(`Order with id ${id} not found`);
       }
@@ -259,7 +268,9 @@ export class OrdersService {
     }
   }
   // get order by priority
-  async getOrdersByPriority(priority: Order['priority']): Promise<ApiResponse<Order[]>> {
+  async getOrdersByPriority(
+    priority: Order['priority'],
+  ): Promise<ApiResponse<Order[]>> {
     try {
       const orders = await this.orderRepository.find({
         where: { priority },
@@ -286,5 +297,5 @@ export class OrdersService {
       };
     }
   }
-  
+  // get orders allocated to driver
 }

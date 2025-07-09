@@ -1,5 +1,14 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, BeforeInsert, BeforeUpdate } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+  BeforeInsert,
+  BeforeUpdate,
+} from 'typeorm';
 import { User } from '../../users/entities/user.entity';
+import { Driver } from 'src/drivers/entities/driver.entity';
 
 export enum OrderStatus {
   PENDING = 'pending',
@@ -45,21 +54,22 @@ export class Order {
   @Column({ nullable: true })
   shipping_address: string;
 
-  @Column({ nullable: true })
-  billing_address: string;
-
+  // @Column({ nullable: true })
+  // billing_address: string;
 
   @Column({ type: 'timestamp', nullable: true })
   shipped_at: Date;
 
   @Column({ type: 'timestamp', nullable: true })
   delivered_at: Date;
+  // @Column({ nullable: true })
+  // driver_id: number;
 
- 
+  @ManyToOne(() => Driver, { eager: false })
+  @JoinColumn({ name: 'driver_id' })
+  driver: Driver;
 
-  
-
-  // Relations
+  // // Relations
   @Column()
   user_id: number;
 
@@ -85,12 +95,12 @@ export class Order {
   // Set timestamps based on status
   private setStatusTimestamps() {
     const now = new Date();
-    
+
     // Set shipped_at when status becomes shipped (if not already set)
     if (this.status === OrderStatus.SHIPPED && !this.shipped_at) {
       this.shipped_at = now;
     }
-    
+
     // Set delivered_at when status becomes delivered (if not already set)
     if (this.status === OrderStatus.DELIVERED && !this.delivered_at) {
       this.delivered_at = now;
@@ -104,7 +114,9 @@ export class Order {
   private createOrderNumber(): string {
     const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const timestamp = Date.now().toString().slice(-6);
-    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    const random = Math.floor(Math.random() * 1000)
+      .toString()
+      .padStart(3, '0');
     return `ORD${date}${timestamp}${random}`;
   }
 }

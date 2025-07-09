@@ -36,6 +36,8 @@ export class CreateFeedbackDto {
 
   @IsString()
   @IsOptional()
-  @MaxLength(1000, { message: 'Admin response must not exceed 1000 characters' })
+  @MaxLength(1000, {
+    message: 'Admin response must not exceed 1000 characters',
+  })
   admin_response?: string;
 }

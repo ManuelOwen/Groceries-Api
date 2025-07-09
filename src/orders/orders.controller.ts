@@ -53,21 +53,27 @@ export class OrdersController {
   // get order by id
   @Get(':id')
   @Roles(Role.ADMIN, Role.USER, Role.DRIVER) // Admins, users, and drivers can view orders
-  async findOne(@Param('id', ParseIntPipe) id: number): Promise<ApiResponse<Order>> {
+  async findOne(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ApiResponse<Order>> {
     return this.ordersService.getOrderById(id);
   }
 
   // get orders by user id
   @Get('user/:userId')
   @Roles(Role.ADMIN, Role.USER) // Admins and users can view user orders
-  async getOrdersByUser(@Param('userId', ParseIntPipe) userId: number): Promise<ApiResponse<Order[]>> {
+  async getOrdersByUser(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<ApiResponse<Order[]>> {
     return this.ordersService.getOrdersByUserId(userId);
   }
 
   // get orders by status
   @Get('status/:status')
   @Roles(Role.ADMIN, Role.DRIVER) // Admins and drivers can filter by status
-  async getOrdersByStatus(@Param('status') status: OrderStatus): Promise<ApiResponse<Order[]>> {
+  async getOrdersByStatus(
+    @Param('status') status: OrderStatus,
+  ): Promise<ApiResponse<Order[]>> {
     return this.ordersService.getOrdersByStatus(status);
   }
 
@@ -84,7 +90,9 @@ export class OrdersController {
   // delete order by id
   @Delete(':id')
   @Roles(Role.ADMIN) // Only admins can delete orders
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<ApiResponse<null>> {
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ApiResponse<null>> {
     return this.ordersService.deleteOrder(id);
   }
 }

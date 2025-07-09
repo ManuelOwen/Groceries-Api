@@ -16,7 +16,15 @@ async function main() {
     username: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASSWORD || '1234',
     database: process.env.DB_NAME || 'Groceries',
-    entities: [User, Location, Payment, Order, Product, Feedback, CustomersSupport],
+    entities: [
+      User,
+      Location,
+      Payment,
+      Order,
+      Product,
+      Feedback,
+      CustomersSupport,
+    ],
     synchronize: false, // Don't sync during cleanup
     logging: true,
   });
@@ -24,9 +32,9 @@ async function main() {
   try {
     await dataSource.initialize();
     console.log('Database connected successfully');
-    
+
     await cleanupDuplicatePhoneNumbers(dataSource);
-    
+
     console.log('Cleanup script completed successfully');
   } catch (error) {
     console.error('Error during cleanup:', error);

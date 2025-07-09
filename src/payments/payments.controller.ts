@@ -37,7 +37,9 @@ export class PaymentsController {
   // create payment
   @Post()
   @Roles(Role.ADMIN, Role.USER) // Admins and users can create payments
-  create(@Body() createPaymentDto: CreatePaymentDto): Promise<ApiResponse<Payment>> {
+  create(
+    @Body() createPaymentDto: CreatePaymentDto,
+  ): Promise<ApiResponse<Payment>> {
     return this.paymentsService.createPayment(createPaymentDto);
   }
 
@@ -51,14 +53,18 @@ export class PaymentsController {
   // get payment by id
   @Get(':id')
   @Roles(Role.ADMIN, Role.USER) // Admins and users can view payments
-  async findOne(@Param('id', ParseIntPipe) id: number): Promise<ApiResponse<Payment>> {
+  async findOne(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ApiResponse<Payment>> {
     return this.paymentsService.getPaymentById(id);
   }
 
   // get payments by user id
   @Get('user/:userId')
   @Roles(Role.ADMIN, Role.USER) // Admins and users can view user payments
-  async getPaymentsByUser(@Param('userId', ParseIntPipe) userId: number): Promise<ApiResponse<Payment[]>> {
+  async getPaymentsByUser(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<ApiResponse<Payment[]>> {
     return this.paymentsService.getPaymentsByUserId(userId);
   }
 
@@ -75,7 +81,9 @@ export class PaymentsController {
   // delete payment by id
   @Delete(':id')
   @Roles(Role.ADMIN) // Only admins can delete payments
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<ApiResponse<null>> {
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ApiResponse<null>> {
     return this.paymentsService.deletePayment(id);
   }
 }

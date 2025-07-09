@@ -34,7 +34,7 @@ export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
     console.log('🔑 AtStrategy - JWT payload received:', payload);
     console.log('🔑 AtStrategy - Payload role type:', typeof payload.role);
     console.log('🔑 AtStrategy - Payload role value:', payload.role);
-    
+
     // Load the full user from database to ensure it exists and is valid
     const user = await this.userRepository.findOne({
       where: { id: payload.sub },
@@ -65,7 +65,7 @@ export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
       created_at: user.created_at,
       updated_at: user.updated_at,
     };
-    
+
     console.log('🔑 AtStrategy - Returning user object:', userObject);
     return userObject;
   }

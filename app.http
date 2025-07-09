@@ -1,8 +1,7 @@
 @url = http://localhost:8000/api/v1
-@adminToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIwLCJlbWFpbCI6Im1hcmlAZXhhbXBsZS5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTE3NTgyMzYsImV4cCI6MTc1MTc2MTgzNn0.FTv4uYbwc5hD0StPlq2293NkWrd8wosHTuCKP3nHZAg
+@adminToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIwLCJlbWFpbCI6Im1hcmlAZXhhbXBsZS5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTIwMDQ5MTAsImV4cCI6MTc1MjAwODUxMH0.zYoy8-8o_ZbkuS254i09763nXXYv_qxZ0Xqg9KHQBxc
 @userToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjE5LCJlbWFpbCI6InRlbkBleGFtcGxlLmNvbSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzUxNDU0MjMyLCJleHAiOjE3NTE0NTc4MzJ9.4-loc3xi9kvriyaGWLYdeMeobGdAq0Om8p2U7GhYXMA
-@driverToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjE0LCJlbWFpbCI6Im5qb3JvZ2VAZXhhbXBsZS5jb20iLCJyb2xlIjoiZHJpdmVyIiwiaWF0IjoxNzUxMzcxNjY0LCJleHAiOjE3NTEzNzUyNjR9.Kw2vbyXeVShn2ALipTWDXyAnJiS0rwXKjxxNyNWEZso
-
+@driverToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjM3LCJlbWFpbCI6ImNhdGVqb2V5QGV4YW1wbGUuY29tIiwicm9sZSI6ImRyaXZlciIsImlhdCI6MTc1MTk3MzEyNywiZXhwIjoxNzUxOTc2NzI3fQ.Hfe4uqijSnBX9_3a6hRqRWV2nXh7ZiVKi6zzq_Wxm_s
 ### get all users
 GET {{url}}/users
 Authorization: Bearer {{adminToken}}
@@ -25,12 +24,12 @@ Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
 {
-  "email": "kuriaj@example.com",
-  "fullName": "kuria mary",
+  "email": "catejoey@example.com",
+  "fullName": "cate joey",
   "address": "789 Oak St, City, Country",
-  "password": "password123",
-  "phoneNumber": "555-555-5555",
-  "role": "user"
+  "password": "Password123",
+  "phoneNumber": "+2547034989534",
+  "role": "driver"
 }
 ### update a user
 PUT {{url}}/users/23
@@ -77,8 +76,8 @@ POST {{url}}/auth/login
 Content-Type: application/json
 
 {
-  "email": "njoroge@example.com",
-  "password": "password123"
+  "email": "catejoey@example.com",
+  "password": "Password123"
 }
 
 ### PRODUCTS ENDPOINTS ###
@@ -96,11 +95,11 @@ Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
 {
-  "product_name": "oranges",
+  "product_name": "onions",
   "availability": true,
   "price": 1.99,
-  "category": "Fruits",
-  "imageUrl": "https://example.com/oranges.jpg"
+  "category": "Vegetables",
+  "imageUrl": "https://example.com/onions.jpg"
 }
 
 ### Update a product (admin only)
@@ -455,3 +454,32 @@ Authorization: Bearer {{adminToken}}
 ### seed customer support tickets
 POST {{url}}/seed/customers-support
 Authorization: Bearer {{adminToken}}
+
+### DRIVERS ENDPOINTS ###
+### Get all drivers (admin only)
+GET {{url}}/drivers
+Authorization: Bearer {{adminToken}}
+### Get driver by id (admin and driver)
+GET {{url}}/drivers/1
+Authorization: Bearer {{adminToken}}
+### Create a new driver (admin only)
+POST {{url}}/drivers
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "driver_number": "DR123456",
+  "driver_name": "mathew john",
+  "license_number": "LIC123456",
+  "order_id": 1,
+  "user_id": 23,
+  "vehicle_type": "motorcycle",
+  "vehicle_registration": "KBC1234",
+  "verification_status": "pending",
+  "total_deliveries": 3
+
+}
+#### get drivers with orders
+GET {{url}}/drivers/orders
+Authorization: Bearer {{adminToken}}
+Authorization: Bearer {{driverToken}}

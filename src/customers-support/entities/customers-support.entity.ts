@@ -1,4 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, BeforeInsert } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+  BeforeInsert,
+} from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 
 export enum SupportTicketStatus {
@@ -104,8 +111,10 @@ export class CustomersSupport {
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');
-    const randomNum = Math.floor(Math.random() * 9999).toString().padStart(4, '0');
-    
+    const randomNum = Math.floor(Math.random() * 9999)
+      .toString()
+      .padStart(4, '0');
+
     this.ticket_number = `CS-${year}${month}${day}-${randomNum}`;
   }
 }

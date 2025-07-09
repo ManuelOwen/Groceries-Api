@@ -5,7 +5,10 @@ import {
 } from '@nestjs/common';
 import { CreateCustomersSupportDto } from './dto/create-customers-support.dto';
 import { UpdateCustomersSupportDto } from './dto/update-customers-support.dto';
-import { CustomersSupport, SupportTicketStatus } from './entities/customers-support.entity';
+import {
+  CustomersSupport,
+  SupportTicketStatus,
+} from './entities/customers-support.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -25,13 +28,17 @@ export class CustomersSupportService {
   ) {}
 
   // create support ticket
-  async createSupportTicket(createCustomersSupportDto: CreateCustomersSupportDto): Promise<ApiResponse<CustomersSupport>> {
+  async createSupportTicket(
+    createCustomersSupportDto: CreateCustomersSupportDto,
+  ): Promise<ApiResponse<CustomersSupport>> {
     try {
-      const ticketData = { 
+      const ticketData = {
         ...createCustomersSupportDto,
-        ticket_number: createCustomersSupportDto.ticket_number || this.generateTicketNumber()
+        ticket_number:
+          createCustomersSupportDto.ticket_number ||
+          this.generateTicketNumber(),
       };
-      
+
       const newTicket = this.customersSupportRepository.create(ticketData);
       const savedTicket = await this.customersSupportRepository.save(newTicket);
 
@@ -86,7 +93,9 @@ export class CustomersSupportService {
   }
 
   // find one support ticket by id
-  async getSupportTicketById(id: number): Promise<ApiResponse<CustomersSupport>> {
+  async getSupportTicketById(
+    id: number,
+  ): Promise<ApiResponse<CustomersSupport>> {
     try {
       const ticket = await this.customersSupportRepository.findOne({
         where: { id },
@@ -127,7 +136,9 @@ export class CustomersSupportService {
   }
 
   // find support tickets by user id
-  async getSupportTicketsByUserId(userId: number): Promise<ApiResponse<CustomersSupport[]>> {
+  async getSupportTicketsByUserId(
+    userId: number,
+  ): Promise<ApiResponse<CustomersSupport[]>> {
     try {
       const tickets = await this.customersSupportRepository.find({
         where: { user_id: userId },
@@ -164,7 +175,9 @@ export class CustomersSupportService {
   }
 
   // find support tickets by status
-  async getSupportTicketsByStatus(status: string): Promise<ApiResponse<CustomersSupport[]>> {
+  async getSupportTicketsByStatus(
+    status: string,
+  ): Promise<ApiResponse<CustomersSupport[]>> {
     try {
       const tickets = await this.customersSupportRepository.find({
         where: { status: status as any },
@@ -207,16 +220,21 @@ export class CustomersSupportService {
   ): Promise<ApiResponse<CustomersSupport>> {
     try {
       // Check if ticket exists
-      const existingTicket = await this.customersSupportRepository.findOne({ where: { id } });
+      const existingTicket = await this.customersSupportRepository.findOne({
+        where: { id },
+      });
       if (!existingTicket) {
         throw new NotFoundException(`Support ticket with id ${id} not found`);
       }
 
       // Handle status-specific updates
       const updateData: any = { ...updateCustomersSupportDto };
-      
+
       // Set resolved_at when status becomes resolved
-      if (updateCustomersSupportDto.status === SupportTicketStatus.RESOLVED && !existingTicket.resolved_at) {
+      if (
+        updateCustomersSupportDto.status === SupportTicketStatus.RESOLVED &&
+        !existingTicket.resolved_at
+      ) {
         updateData.resolved_at = new Date();
       }
 
@@ -229,7 +247,8 @@ export class CustomersSupportService {
         throw new NotFoundException(`Support ticket with id ${id} not found`);
       }
 
-      const updatedTicket = await this.customersSupportRepository.save(ticketToUpdate);
+      const updatedTicket =
+        await this.customersSupportRepository.save(ticketToUpdate);
 
       return {
         success: true,
@@ -252,7 +271,9 @@ export class CustomersSupportService {
   async deleteSupportTicket(id: number): Promise<ApiResponse<null>> {
     try {
       // Check if ticket exists first
-      const existingTicket = await this.customersSupportRepository.findOne({ where: { id } });
+      const existingTicket = await this.customersSupportRepository.findOne({
+        where: { id },
+      });
       if (!existingTicket) {
         throw new NotFoundException(`Support ticket with id ${id} not found`);
       }
@@ -288,7 +309,9 @@ export class CustomersSupportService {
   private generateTicketNumber(): string {
     const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const timestamp = Date.now().toString().slice(-6);
-    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    const random = Math.floor(Math.random() * 1000)
+      .toString()
+      .padStart(3, '0');
     return `TKT${date}${timestamp}${random}`;
   }
 }

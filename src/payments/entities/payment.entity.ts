@@ -1,4 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, BeforeInsert } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+  BeforeInsert,
+} from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 
 export enum PaymentStatus {
@@ -77,8 +84,10 @@ export class Payment {
 
   private createTransactionId(): string {
     const timestamp = Date.now().toString();
-    const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-    
+    const random = Math.floor(Math.random() * 10000)
+      .toString()
+      .padStart(4, '0');
+
     switch (this.payment_method) {
       case PaymentMethod.MPESA:
         return `MP${timestamp.slice(-8)}${random}`;
@@ -95,7 +104,9 @@ export class Payment {
 
   private createReferenceNumber(): string {
     const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-    const random = Math.floor(Math.random() * 100000).toString().padStart(5, '0');
+    const random = Math.floor(Math.random() * 100000)
+      .toString()
+      .padStart(5, '0');
     return `REF${date}${random}`;
   }
 }

@@ -9,7 +9,6 @@ export enum Role {
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
-  
 
   @Column()
   fullName: string;

@@ -25,9 +25,10 @@ export class LocationService {
   ) {}
 
   // create location
-  async createLocation(createLocationDto: CreateLocationDto): Promise<ApiResponse<Location>> {
+  async createLocation(
+    createLocationDto: CreateLocationDto,
+  ): Promise<ApiResponse<Location>> {
     try {
-
       const newLocation = this.locationRepository.create(createLocationDto);
       const savedLocation = await this.locationRepository.save(newLocation);
 
@@ -102,7 +103,9 @@ export class LocationService {
   ): Promise<ApiResponse<Location>> {
     try {
       // Check if location exists
-      const existingLocation = await this.locationRepository.findOne({ where: { id } });
+      const existingLocation = await this.locationRepository.findOne({
+        where: { id },
+      });
       if (!existingLocation) {
         throw new NotFoundException(`Location with id ${id} not found`);
       }
@@ -116,7 +119,8 @@ export class LocationService {
         throw new NotFoundException(`Location with id ${id} not found`);
       }
 
-      const updatedLocation = await this.locationRepository.save(locationToUpdate);
+      const updatedLocation =
+        await this.locationRepository.save(locationToUpdate);
 
       return {
         success: true,
@@ -139,7 +143,9 @@ export class LocationService {
   async deleteLocation(id: number): Promise<ApiResponse<null>> {
     try {
       // Check if location exists first
-      const existingLocation = await this.locationRepository.findOne({ where: { id } });
+      const existingLocation = await this.locationRepository.findOne({
+        where: { id },
+      });
       if (!existingLocation) {
         throw new NotFoundException(`Location with id ${id} not found`);
       }
