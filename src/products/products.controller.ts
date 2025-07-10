@@ -22,8 +22,7 @@ import { AtGuard } from 'src/auth/token/token.guard';
 import { Public, Roles } from 'src/auth/decorators';
 import { Role } from 'src/users/entities/user.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { multerCloudinaryStorage } from '../config/multer-cloudinary.config';
 
 // Define ApiResponse interface to match the service
 interface ApiResponse<T = any> {
@@ -41,11 +40,13 @@ export class ProductsController {
 
   // Create product - only admins can create products
   @Post()
-  @Roles(Role.ADMIN)
-  create(
+  @UseInterceptors(FileInterceptor('image', { storage: multerCloudinaryStorage }))
+  async createProduct(
     @Body() createProductDto: CreateProductDto,
-  ): Promise<ApiResponse<Product>> {
-    return this.productsService.create(createProductDto);
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    const imageUrl = file?.path;
+    return this.productsService.createProductWithImage(createProductDto, imageUrl);
   }
 
   // Get all products -
@@ -83,13 +84,7 @@ export class ProductsController {
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('file', {
-    storage: diskStorage({
-      destination: './uploads/products',
-      filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        cb(null, uniqueSuffix + extname(file.originalname));
-      },
-    }),
+    storage: multerCloudinaryStorage,
     fileFilter: (req, file, cb) => {
       if (!file.mimetype.match(/^image\/(jpg|jpeg|png|gif)$/)) {
         return cb(new Error('Only image files are allowed!'), false);

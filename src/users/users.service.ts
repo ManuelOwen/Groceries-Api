@@ -11,7 +11,9 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
-import { Repository, QueryFailedError } from 'typeorm';
+import { Repository, QueryFailedError, IsNull } from 'typeorm';
+import { validate } from 'class-validator';
+import { plainToInstance } from 'class-transformer';
 
 // Response interfaces
 interface ApiResponse<T = any> {
@@ -226,6 +228,7 @@ export class UsersService {
           'created_at',
           'updated_at',
         ],
+        where: { deletedAt: IsNull() }, // Exclude soft-deleted users
       });
 
       this.logger.log(`Successfully retrieved ${users.length} users`);
@@ -259,7 +262,7 @@ export class UsersService {
       this.logger.log(`Fetching user with ID: ${id}`);
 
       const user = await this.userRepository.findOne({
-        where: { id },
+        where: { id, deletedAt: IsNull() }, // Exclude soft-deleted users
         select: [
           'id',
           'fullName',
@@ -338,6 +341,17 @@ export class UsersService {
         });
       }
 
+      // Validate role if being updated
+      if (updateUserDto.role) {
+        const validRoles = ['admin', 'driver', 'user']; // Adjust based on your actual roles
+        if (!validRoles.includes(updateUserDto.role)) {
+          throw new BadRequestException({
+            message: `Invalid role: ${updateUserDto.role}`,
+            validRoles,
+          });
+        }
+      }
+
       // If email is being updated, check for conflicts
       if (updateUserDto.email && updateUserDto.email !== existingUser.email) {
         const emailExists = await this.userRepository.findOne({
@@ -357,7 +371,7 @@ export class UsersService {
       }
 
       // Prepare update data
-      const updateData = { ...updateUserDto };
+      const updateData: Partial<User> = { ...updateUserDto };
 
       // If password is being updated, hash it
       if (updateUserDto.password) {
@@ -375,18 +389,22 @@ export class UsersService {
         }
       }
 
-      // Sanitize email if provided
+      // Sanitize fields
       if (updateData.email) {
         updateData.email = updateData.email.toLowerCase().trim();
       }
-
-      // Sanitize other string fields
       if (updateData.fullName) {
         updateData.fullName = updateData.fullName.trim();
       }
       if (updateData.phoneNumber) {
         updateData.phoneNumber = updateData.phoneNumber.trim();
       }
+
+      // Log the update data for debugging
+      this.logger.debug('Prepared update data:', {
+        userId: id,
+        updateData,
+      });
 
       let userToUpdate: User | undefined;
       try {
@@ -397,11 +415,16 @@ export class UsersService {
       } catch (preloadError) {
         this.logger.error('Failed to preload user data for update', {
           error: preloadError.message,
+          stack: preloadError.stack,
           userId: id,
         });
         throw new InternalServerErrorException(
           'Failed to prepare user data for update',
         );
+      }
+
+      if (userToUpdate) {
+        userToUpdate = plainToInstance(User, userToUpdate);
       }
 
       if (!userToUpdate) {
@@ -412,22 +435,38 @@ export class UsersService {
         });
       }
 
+      // Validate the DTO, not the entity
+      const dtoInstance = plainToInstance(UpdateUserDto, updateData);
+      const errors = await validate(dtoInstance);
+      if (errors.length > 0) {
+        this.logger.error('User DTO validation failed', {
+          error: 'Validation failed',
+          invalidFields: errors,
+          userId: id,
+        });
+        // Log errors for debugging
+        console.error('Validation errors:', JSON.stringify(errors, null, 2));
+        throw new BadRequestException(errors);
+      }
+
       let updatedUser: User;
       try {
         updatedUser = await this.userRepository.save(userToUpdate);
         this.logger.log(`User updated successfully with ID: ${id}`);
       } catch (saveError) {
-        // Handle specific database errors
+        this.logger.error('Full save error details:', {
+          message: saveError.message,
+          name: saveError.name,
+          code: saveError.code,
+          driverError: saveError.driverError,
+          stack: saveError.stack,
+          userId: id,
+        });
+
         if (saveError instanceof QueryFailedError) {
-          if (
-            saveError.message.includes(
-              'duplicate key value violates unique constraint',
-            )
-          ) {
+          // Handle unique constraint violations
+          if (saveError.driverError?.code === '23505') {
             if (saveError.message.includes('email')) {
-              this.logger.warn(
-                `Database unique constraint violation during update for email: ${updateData.email}`,
-              );
               throw new ConflictException({
                 message: 'Email address is already registered',
                 email: updateData.email,
@@ -435,16 +474,32 @@ export class UsersService {
               });
             }
           }
+          // Handle foreign key violations (e.g., invalid role)
+          else if (saveError.driverError?.code === '23503') {
+            if (saveError.message.includes('role')) {
+              throw new BadRequestException({
+                message: 'Invalid role specified',
+                role: updateData.role,
+                validRoles: ['admin', 'driver', 'user'], // Adjust as needed
+              });
+            }
+          }
+          // Handle not-null constraint violations
+          else if (saveError.driverError?.code === '23502') {
+            const column = saveError.message.match(/column "([^"]+)"/i)?.[1];
+            throw new BadRequestException({
+              message: `Required field ${column} is missing or null`,
+              field: column,
+            });
+          }
         }
-
-        this.logger.error('Database save operation failed during update', {
-          error: saveError.message,
-          stack: saveError.stack,
-          userId: id,
-        });
 
         throw new InternalServerErrorException({
           message: 'Failed to save user updates',
+          errorDetails: {
+            code: saveError.code,
+            constraint: saveError.driverError?.constraint,
+          },
           suggestion: 'Please try again later or contact support',
         });
       }
@@ -479,21 +534,22 @@ export class UsersService {
       });
     }
   }
-  // delete user by id
+  // delete user by id (soft delete)
   async deleteUser(id: number): Promise<ApiResponse<null>> {
+    this.logger.debug(`[SoftDelete] Called deleteUser for ID: ${id}`);
     try {
       // Validate input
       if (!id || isNaN(id) || id <= 0) {
-        this.logger.warn(`Invalid user ID provided for deletion: ${id}`);
+        this.logger.warn(`[SoftDelete] Invalid user ID provided for deletion: ${id}`);
         throw new BadRequestException('Invalid user ID provided');
       }
 
-      this.logger.log(`Attempting to delete user with ID: ${id}`);
+      this.logger.log(`[SoftDelete] Attempting to soft delete user with ID: ${id}`);
 
       // Check if user exists first
       const existingUser = await this.userRepository.findOne({ where: { id } });
       if (!existingUser) {
-        this.logger.warn(`User not found for deletion with ID: ${id}`);
+        this.logger.warn(`[SoftDelete] User not found for deletion with ID: ${id}`);
         throw new NotFoundException({
           message: `User with ID ${id} not found`,
           userId: id,
@@ -503,57 +559,36 @@ export class UsersService {
 
       // Prevent deletion of admin users (optional business rule)
       if (existingUser.role === 'admin') {
-        this.logger.warn(`Attempt to delete admin user with ID: ${id}`);
+        this.logger.warn(`[SoftDelete] Attempt to delete admin user with ID: ${id}`);
         throw new BadRequestException({
           message: 'Admin users cannot be deleted',
           suggestion: 'Please contact system administrator',
         });
       }
 
-      let deleteResult;
+      // Soft delete: set deletedAt
+      existingUser.deletedAt = new Date();
+      this.logger.debug(`[SoftDelete] Setting deletedAt for user ID: ${id}`);
       try {
-        deleteResult = await this.userRepository.delete(id);
-      } catch (deleteError) {
-        // Handle foreign key constraint violations
-        if (deleteError instanceof QueryFailedError) {
-          if (deleteError.message.includes('foreign key constraint')) {
-            this.logger.warn(
-              `Cannot delete user due to foreign key constraints, ID: ${id}`,
-            );
-            throw new ConflictException({
-              message: 'Cannot delete user as they have associated records',
-              suggestion: 'Please ensure all related data is removed first',
-            });
-          }
-        }
-
-        this.logger.error('Database delete operation failed', {
-          error: deleteError.message,
-          stack: deleteError.stack,
+        await this.userRepository.save(existingUser);
+        this.logger.debug(`[SoftDelete] User with ID: ${id} soft deleted (deletedAt set).`);
+      } catch (saveError) {
+        this.logger.error('[SoftDelete] Database soft delete operation failed', {
+          error: saveError.message,
+          stack: saveError.stack,
           userId: id,
         });
-
         throw new InternalServerErrorException({
-          message: 'Failed to delete user',
+          message: 'Failed to soft delete user',
           suggestion: 'Please try again later or contact support',
         });
       }
 
-      if (deleteResult.affected === 0) {
-        this.logger.error(
-          `Delete operation affected 0 rows for user ID: ${id}`,
-        );
-        throw new InternalServerErrorException({
-          message: `Failed to delete user with ID ${id}`,
-          suggestion: 'User may have been deleted by another process',
-        });
-      }
-
-      this.logger.log(`User deleted successfully with ID: ${id}`);
+      this.logger.log(`[SoftDelete] User soft deleted successfully with ID: ${id}`);
 
       return {
         success: true,
-        message: `User with ID ${id} deleted successfully`,
+        message: `User with ID ${id} soft deleted successfully`,
         data: null,
       };
     } catch (error) {
@@ -567,7 +602,7 @@ export class UsersService {
       }
 
       this.logger.error(
-        `Unexpected error during user deletion with ID: ${id}`,
+        `[SoftDelete] Unexpected error during user soft deletion with ID: ${id}`,
         {
           error: error.message,
           stack: error.stack,
@@ -576,7 +611,7 @@ export class UsersService {
       );
 
       throw new InternalServerErrorException({
-        message: `Failed to delete user with ID ${id}`,
+        message: `Failed to soft delete user with ID ${id}`,
         suggestion: 'Please try again later or contact support',
       });
     }

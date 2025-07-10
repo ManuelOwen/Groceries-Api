@@ -31,7 +31,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
         message = exceptionResponse;
         error = exception.name;
       } else if (typeof exceptionResponse === 'object') {
-        message = (exceptionResponse as any).message || exceptionResponse;
+        // If validation errors are present, include them in the response
+        if (Array.isArray((exceptionResponse as any).message)) {
+          message = (exceptionResponse as any).message;
+        } else {
+          message = (exceptionResponse as any).message || exceptionResponse;
+        }
         error = (exceptionResponse as any).error || exception.name;
       }
     } else if (exception instanceof QueryFailedError) {

@@ -42,8 +42,8 @@ export class CreateUserDto {
 
   @IsString()
   @IsNotEmpty({ message: 'Phone number is required' })
-  @Matches(/^[\+]?[1-9][\d]{0,15}$/, {
-    message: 'Please provide a valid phone number',
+  @Matches(/^\+2547\d{8}$/, {
+    message: 'Please provide a valid phone number in the format +2547XXXXXXXX',
   })
   phoneNumber: string;
 

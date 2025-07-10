@@ -33,7 +33,7 @@ async function bootstrap() {
       'http://localhost:5173',
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    allowHeaders: 'Content-Type,Accept,Authorization',
+    allowedHeaders: ['Content-Type', 'Accept', 'Authorization'],
     credentials: true,
   });
   // enable global validation pipes

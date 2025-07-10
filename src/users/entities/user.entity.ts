@@ -38,6 +38,9 @@ export class User {
   @Column({ type: 'varchar', nullable: true })
   hashedRefreshToken: string | null;
 
+  @Column({ type: 'timestamp', nullable: true })
+  deletedAt?: Date;
+
   @Column({
     type: 'enum',
     enum: Role,

@@ -58,6 +58,14 @@ export class ProductsService {
     }
   }
 
+  async createProductWithImage(createProductDto: CreateProductDto, imageUrl: string) {
+    const product = this.productRepository.create({
+      ...createProductDto,
+      imageUrl: imageUrl, // Save Cloudinary URL to imageUrl
+    });
+    return this.productRepository.save(product);
+  }
+
   // find all products
   async findAll(): Promise<ApiResponse<Product[]>> {
     try {

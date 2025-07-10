@@ -6,6 +6,7 @@ import {
   Min,
   IsBoolean,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 import { ProductCategory } from '../entities/product.entity';
 
 export class CreateProductDto {
@@ -13,8 +14,9 @@ export class CreateProductDto {
   @IsNotEmpty()
   product_name: string;
 
+  @Type(() => Number)
   @IsNumber()
-  @Min(0.01)
+  @Min(0)
   price: number;
 
   @IsBoolean()

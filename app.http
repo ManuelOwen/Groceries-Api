@@ -1,5 +1,5 @@
 @url = http://localhost:8000/api/v1
-@adminToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIwLCJlbWFpbCI6Im1hcmlAZXhhbXBsZS5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTIwMDQ5MTAsImV4cCI6MTc1MjAwODUxMH0.zYoy8-8o_ZbkuS254i09763nXXYv_qxZ0Xqg9KHQBxc
+@adminToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjQwLCJlbWFpbCI6ImJpbGx5QGdtYWlsLmNvbSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc1MjEzNjAxNSwiZXhwIjoxNzUyMTM5NjE1fQ.zkb0cfouLPrPyhweaMcBk9OvYISM7bWXN-2d5iOHjuc
 @userToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjE5LCJlbWFpbCI6InRlbkBleGFtcGxlLmNvbSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzUxNDU0MjMyLCJleHAiOjE3NTE0NTc4MzJ9.4-loc3xi9kvriyaGWLYdeMeobGdAq0Om8p2U7GhYXMA
 @driverToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjM3LCJlbWFpbCI6ImNhdGVqb2V5QGV4YW1wbGUuY29tIiwicm9sZSI6ImRyaXZlciIsImlhdCI6MTc1MTk3MzEyNywiZXhwIjoxNzUxOTc2NzI3fQ.Hfe4uqijSnBX9_3a6hRqRWV2nXh7ZiVKi6zzq_Wxm_s
 ### get all users
@@ -67,8 +67,8 @@ POST {{url}}/auth/login
 Content-Type: application/json
 
 {
-  "email": "mari@example.com",
-  "password": "password123"
+  "email": "billy@gmail.com",
+  "password": "Password123"
 }
 
 ### login as driver
@@ -118,6 +118,18 @@ Content-Type: application/json
 ### Delete a product (admin only)
 DELETE {{url}}/products/1
 Authorization: Bearer {{adminToken}}
+
+### Upload a product image (admin only)
+POST {{url}}/products/upload
+Authorization: Bearer {{adminToken}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="onions.jpg"
+Content-Type: image/jpeg
+
+< ./uploads/products/onions.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
 
 ### LOCATION ENDPOINTS ###
 

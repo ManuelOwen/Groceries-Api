@@ -36,6 +36,9 @@ export class Product {
   @Column({ type: 'varchar', length: 500, nullable: true })
   imageUrl: string;
 
+  @Column({ nullable: true })
+  image: string;
+
   @CreateDateColumn()
   created_at: Date;
 
