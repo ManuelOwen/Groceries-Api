@@ -84,7 +84,10 @@ export class OrdersController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateOrderDto: UpdateOrderDto,
   ): Promise<ApiResponse<Order>> {
-    console.log('[UpdateOrder] Received update data:', JSON.stringify(updateOrderDto, null, 2));
+    console.log(
+      '[UpdateOrder] Received update data:',
+      JSON.stringify(updateOrderDto, null, 2),
+    );
     console.log('[UpdateOrder] Order ID:', id);
     console.log('[UpdateOrder] Data types:', {
       total_amount: typeof updateOrderDto.total_amount,

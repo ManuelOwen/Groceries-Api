@@ -58,7 +58,10 @@ export class ProductsService {
     }
   }
 
-  async createProductWithImage(createProductDto: CreateProductDto, imageUrl: string) {
+  async createProductWithImage(
+    createProductDto: CreateProductDto,
+    imageUrl: string,
+  ) {
     const product = this.productRepository.create({
       ...createProductDto,
       imageUrl: imageUrl, // Save Cloudinary URL to imageUrl

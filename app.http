@@ -6,8 +6,12 @@
 GET {{url}}/users
 Authorization: Bearer {{adminToken}}
 
+### seed users
+POST {{url}}/seed/users
+
 ### seed database (all data)
 POST {{url}}/seed
+
 
 ### seed only payments
 POST {{url}}/seed/payments
@@ -24,12 +28,12 @@ Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
 {
-  "email": "kibet22@gmail.com",
-  "fullName": "kibet owen",
+  "email": "senge@gmail.com",
+  "fullName": "Kai senge",
   "address": "P. BOX 123, Nairobi, Kenya",
   "password": "Password123",
-  "phoneNumber": "+254712344455",
-  "role": "admin"
+  "phoneNumber": "+254765788990",
+  "role": "driver"
 }
 ### update a user
 PUT {{url}}/users/23
@@ -67,7 +71,7 @@ POST {{url}}/auth/login
 Content-Type: application/json
 
 {
-  "email": "billy@gmail.com",
+  "email": "manuel22@gmail.com",
   "password": "Password123"
 }
 

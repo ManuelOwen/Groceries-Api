@@ -225,10 +225,10 @@ export class UsersService {
           'address',
           'phoneNumber',
           'role',
-          'created_at',
-          'updated_at',
+          // 'created_at',
+          // 'updated_at',
         ],
-        where: { deletedAt: IsNull() }, // Exclude soft-deleted users
+        // where: { deletedAt: IsNull() }, // Exclude soft-deleted users
       });
 
       this.logger.log(`Successfully retrieved ${users.length} users`);
@@ -262,7 +262,7 @@ export class UsersService {
       this.logger.log(`Fetching user with ID: ${id}`);
 
       const user = await this.userRepository.findOne({
-        where: { id, deletedAt: IsNull() }, // Exclude soft-deleted users
+         // Exclude soft-deleted users
         select: [
           'id',
           'fullName',
@@ -270,8 +270,8 @@ export class UsersService {
           'address',
           'phoneNumber',
           'role',
-          'created_at',
-          'updated_at',
+          // 'created_at',
+          // 'updated_at',
         ],
       });
 
@@ -540,16 +540,22 @@ export class UsersService {
     try {
       // Validate input
       if (!id || isNaN(id) || id <= 0) {
-        this.logger.warn(`[SoftDelete] Invalid user ID provided for deletion: ${id}`);
+        this.logger.warn(
+          `[SoftDelete] Invalid user ID provided for deletion: ${id}`,
+        );
         throw new BadRequestException('Invalid user ID provided');
       }
 
-      this.logger.log(`[SoftDelete] Attempting to soft delete user with ID: ${id}`);
+      this.logger.log(
+        `[SoftDelete] Attempting to soft delete user with ID: ${id}`,
+      );
 
       // Check if user exists first
       const existingUser = await this.userRepository.findOne({ where: { id } });
       if (!existingUser) {
-        this.logger.warn(`[SoftDelete] User not found for deletion with ID: ${id}`);
+        this.logger.warn(
+          `[SoftDelete] User not found for deletion with ID: ${id}`,
+        );
         throw new NotFoundException({
           message: `User with ID ${id} not found`,
           userId: id,
@@ -559,7 +565,9 @@ export class UsersService {
 
       // Prevent deletion of admin users (optional business rule)
       if (existingUser.role === 'admin') {
-        this.logger.warn(`[SoftDelete] Attempt to delete admin user with ID: ${id}`);
+        this.logger.warn(
+          `[SoftDelete] Attempt to delete admin user with ID: ${id}`,
+        );
         throw new BadRequestException({
           message: 'Admin users cannot be deleted',
           suggestion: 'Please contact system administrator',
@@ -567,24 +575,31 @@ export class UsersService {
       }
 
       // Soft delete: set deletedAt
-      existingUser.deletedAt = new Date();
+
       this.logger.debug(`[SoftDelete] Setting deletedAt for user ID: ${id}`);
       try {
         await this.userRepository.save(existingUser);
-        this.logger.debug(`[SoftDelete] User with ID: ${id} soft deleted (deletedAt set).`);
+        this.logger.debug(
+          `[SoftDelete] User with ID: ${id} soft deleted (deletedAt set).`,
+        );
       } catch (saveError) {
-        this.logger.error('[SoftDelete] Database soft delete operation failed', {
-          error: saveError.message,
-          stack: saveError.stack,
-          userId: id,
-        });
+        this.logger.error(
+          '[SoftDelete] Database soft delete operation failed',
+          {
+            error: saveError.message,
+            stack: saveError.stack,
+            userId: id,
+          },
+        );
         throw new InternalServerErrorException({
           message: 'Failed to soft delete user',
           suggestion: 'Please try again later or contact support',
         });
       }
 
-      this.logger.log(`[SoftDelete] User soft deleted successfully with ID: ${id}`);
+      this.logger.log(
+        `[SoftDelete] User soft deleted successfully with ID: ${id}`,
+      );
 
       return {
         success: true,

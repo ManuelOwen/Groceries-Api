@@ -41,4 +41,12 @@ export class SeedController {
     this.logger.log('Seed customer support endpoint called');
     return this.seedService.seedCustomersSupport();
   }
+
+  // seed users
+  @Post('users')
+  @HttpCode(HttpStatus.OK)
+  async seedUsers() {
+    this.logger.log('seed endpoint called');
+    return this.seedService.seedUsers();
+  }
 }

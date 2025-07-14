@@ -5,7 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-export enum ProductCategory{
+export enum ProductCategory {
   FRUIT = 'fruit',
   VEGETABLE = 'vegetable',
   DAIRY = 'dairy',

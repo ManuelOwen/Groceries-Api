@@ -8,6 +8,7 @@ import {
   MinLength,
   MaxLength,
   Matches,
+ 
 } from 'class-validator';
 
 import { Role } from '../entities/user.entity';
@@ -17,6 +18,9 @@ export class CreateUserDto {
   @IsNotEmpty({ message: 'Full name is required' })
   @MinLength(2, { message: 'Full name must be at least 2 characters long' })
   @MaxLength(100, { message: 'Full name must not exceed 100 characters' })
+  @Matches(/^[a-zA-Z\s]+$/, {
+    message: 'Full name must contain only letters and spaces',
+  })
   fullName: string;
 
   @IsEmail({}, { message: 'Please provide a valid email address' })
@@ -34,9 +38,9 @@ export class CreateUserDto {
   @IsNotEmpty({ message: 'Password is required' })
   @MinLength(6, { message: 'Password must be at least 6 characters long' })
   @MaxLength(128, { message: 'Password must not exceed 128 characters' })
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, {
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])?/, {
     message:
-      'Password must contain at least one lowercase letter, one uppercase letter, and one number',
+      'Password must contain at least one lowercase letter, one uppercase letter, and one number. Special characters are optional but recommended',
   })
   password: string;
 
@@ -47,7 +51,9 @@ export class CreateUserDto {
   })
   phoneNumber: string;
 
-  @IsEnum(Role, { message: 'Role must be a valid role (admin, user, driver)' })
+  @IsEnum(Role, {
+    message: 'Role must be a valid role (admin, user, driver)',
+  })
   @IsOptional() // Make role optional since it has a default value
-  role?: Role;
+  role?: Role = Role.USER; // Set default value to USER
 }

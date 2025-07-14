@@ -40,13 +40,18 @@ export class ProductsController {
 
   // Create product - only admins can create products
   @Post()
-  @UseInterceptors(FileInterceptor('image', { storage: multerCloudinaryStorage }))
+  @UseInterceptors(
+    FileInterceptor('image', { storage: multerCloudinaryStorage }),
+  )
   async createProduct(
     @Body() createProductDto: CreateProductDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
     const imageUrl = file?.path;
-    return this.productsService.createProductWithImage(createProductDto, imageUrl);
+    return this.productsService.createProductWithImage(
+      createProductDto,
+      imageUrl,
+    );
   }
 
   // Get all products -
@@ -84,16 +89,18 @@ export class ProductsController {
   // Upload product image - only admins can upload images
 
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file', {
-    storage: multerCloudinaryStorage,
-    fileFilter: (req, file, cb) => {
-      if (!file.mimetype.match(/^image\/(jpg|jpeg|png|gif)$/)) {
-        return cb(new Error('Only image files are allowed!'), false);
-      }
-      cb(null, true);
-    },
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
-  }))
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: multerCloudinaryStorage,
+      fileFilter: (req, file, cb) => {
+        if (!file.mimetype.match(/^image\/(jpg|jpeg|png|gif)$/)) {
+          return cb(new Error('Only image files are allowed!'), false);
+        }
+        cb(null, true);
+      },
+      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+    }),
+  )
   async uploadProductImage(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
       return { success: false, message: 'No file uploaded' };

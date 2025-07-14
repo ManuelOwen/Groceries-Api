@@ -91,11 +91,11 @@ export class AuthService {
       // Verify the token was saved
       const updatedUser = await this.userRepository.findOne({
         where: { id },
-        select: ['id', 'hashedRefreshToken'],
+        // select: ['id', 'hashedRefreshToken'],
       });
       console.log(
         `Verification - User ${id} hashedRefreshToken:`,
-        updatedUser?.hashedRefreshToken,
+        // updatedUser?.hashedRefreshToken,
       );
     } catch (error) {
       console.error('Error saving refresh token:', error);
@@ -310,7 +310,17 @@ export class AuthService {
   async signIn(createAuthDto: LoginDto) {
     const foundUser = await this.userRepository.findOne({
       where: { email: createAuthDto.email },
-      select: ['id', 'email', 'password', 'role', 'fullName', 'address', 'phoneNumber', 'created_at', 'updated_at'], // include all relevant fields
+      select: [
+        'id',
+        'email',
+        'password',
+        'role',
+        'fullName',
+        'address',
+        'phoneNumber',
+        // 'created_at',
+        // 'updated_at',
+      ], // include all relevant fields
     });
     if (!foundUser) {
       throw new NotFoundException(
@@ -348,8 +358,8 @@ export class AuthService {
         address: foundUser.address,
         phoneNumber: foundUser.phoneNumber,
         role: foundUser.role, // should be 'user', 'admin', or 'driver'
-        created_at: foundUser.created_at,
-        updated_at: foundUser.updated_at,
+        // created_at: foundUser.created_at,
+        // updated_at: foundUser.updated_at,
       },
     };
   }
@@ -371,31 +381,31 @@ export class AuthService {
   async refreshTokens(id: number, refreshToken: string) {
     const foundUser = await this.userRepository.findOne({
       where: { id: id },
-      select: ['id', 'email', 'role', 'hashedRefreshToken'],
+      // select: ['id', 'email', 'role', 'hashedRefreshToken'],
     });
 
     if (!foundUser) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    if (!foundUser.hashedRefreshToken) {
+    // if (!foundUser.hashedRefreshToken) {
       throw new NotFoundException('No refresh token found');
     }
-
-    const refreshTokenMatches = await bcrypt.compare(
-      refreshToken,
-      foundUser.hashedRefreshToken,
-    );
-
-    if (!refreshTokenMatches) {
-      throw new NotFoundException('Invalid refresh token');
-    }
-    const { accessToken, refreshToken: newRefreshToken } = await this.getTokens(
-      foundUser.id,
-      foundUser.email,
-      foundUser.role,
-    );
-    await this.saveRefreshToken(foundUser.id, newRefreshToken);
-    return { accessToken, refreshToken: newRefreshToken };
   }
-}
+    // const refreshTokenMatches = await bcrypt.compare(
+    //   refreshToken,
+    //   foundUser.hashedRefreshToken,
+    // );
+
+//     if (!refreshTokenMatches) {
+//       throw new NotFoundException('Invalid refresh token');
+//     }
+//     const { accessToken, refreshToken: newRefreshToken } = await this.getTokens(
+//       foundUser.id,
+//       foundUser.email,
+//       foundUser.role,
+//     );
+//     await this.saveRefreshToken(foundUser.id, newRefreshToken);
+//     return { accessToken, refreshToken: newRefreshToken };
+//   }
+// }

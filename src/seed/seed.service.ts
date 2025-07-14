@@ -71,11 +71,11 @@ export class SeedService {
       this.logger.log('Seeding users...');
       const users = [
         {
-          email: 'ten@example.com',
+          email: 'ten@gmail.com',
           fullName: 'Ten User',
           address: '123 Main St, City, Country',
           password: hashedPassword,
-          phoneNumber: '123-456-7890',
+          phoneNumber: '+254766558889',
           role: Role.USER,
         },
         {
@@ -83,7 +83,7 @@ export class SeedService {
           fullName: 'Mari User',
           address: '456 Elm St, City, Country',
           password: hashedPassword,
-          phoneNumber: '987-654-3210',
+          phoneNumber: '+254756665443',
           role: Role.ADMIN,
         },
       ];
@@ -851,4 +851,47 @@ export class SeedService {
 
     return `CS-${year}${month}${day}-${randomNum}`;
   }
+
+  // Seed users (utility method)
+  async seedUsers() {
+    this.logger.log('Seeding users...');
+    const users = [
+      {
+        email: 'ten@gmail.com',
+        fullName: 'Ten User',
+        address: '123 Main St, City, Country',
+        password: 'Password123',
+        phoneNumber: '+254766558889',
+        role: Role.USER,
+      },
+      {
+        email: 'mari@example.com',
+        fullName: 'Mari User',
+        address: '456 Elm St, City, Country',
+        password: 'Password123',
+        phoneNumber: '+254756665443',
+        role: Role.ADMIN,
+      },
+    ];
+
+    const savedUsers = await this.userRepository.save(users);
+    this.logger.log(
+      `Users seeded successfully. Created ${savedUsers.length} users.`,
+    );
+
+    return {
+      success: true,
+      message: `Successfully seeded ${savedUsers.length} users`,
+      users: savedUsers.map((user) => ({
+        id: user.id,
+        email: user.email,
+        name: user.fullName,
+        role: user.role,
+      })),
+    };
+  }
+}
+
+function seedUsers() {
+  throw new Error('Function not implemented.');
 }

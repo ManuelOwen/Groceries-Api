@@ -62,8 +62,8 @@ export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
       fullName: user.fullName,
       address: user.address,
       phoneNumber: user.phoneNumber,
-      created_at: user.created_at,
-      updated_at: user.updated_at,
+      // created_at: user.created_at,
+      // updated_at: user.updated_at,
     };
 
     console.log('🔑 AtStrategy - Returning user object:', userObject);
