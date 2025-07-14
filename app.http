@@ -24,12 +24,12 @@ Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
 {
-  "email": "catejoey@example.com",
-  "fullName": "cate joey",
-  "address": "789 Oak St, City, Country",
+  "email": "kibet22@gmail.com",
+  "fullName": "kibet owen",
+  "address": "P. BOX 123, Nairobi, Kenya",
   "password": "Password123",
-  "phoneNumber": "+2547034989534",
-  "role": "driver"
+  "phoneNumber": "+254712344455",
+  "role": "admin"
 }
 ### update a user
 PUT {{url}}/users/23

@@ -70,7 +70,6 @@ export class Payment {
   @ManyToOne(() => User, { eager: false })
   @JoinColumn({ name: 'user_id' })
   user: User;
-
   // Auto-generate transaction ID before inserting
   @BeforeInsert()
   generateTransactionId() {
@@ -81,7 +80,6 @@ export class Payment {
       this.reference_number = this.createReferenceNumber();
     }
   }
-
   private createTransactionId(): string {
     const timestamp = Date.now().toString();
     const random = Math.floor(Math.random() * 10000)
@@ -101,7 +99,6 @@ export class Payment {
         return `TX${timestamp.slice(-8)}${random}`;
     }
   }
-
   private createReferenceNumber(): string {
     const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const random = Math.floor(Math.random() * 100000)

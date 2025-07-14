@@ -81,6 +81,7 @@ export class ProductsController {
   remove(@Param('id', ParseIntPipe) id: number): Promise<ApiResponse<null>> {
     return this.productsService.remove(id);
   }
+  // Upload product image - only admins can upload images
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('file', {

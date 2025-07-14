@@ -1,3 +1,7 @@
+
+import { Type } from 'class-transformer';
+import { OrderStatus, OrderPriority } from '../entities/order.entity';
+
 import {
   IsNumber,
   IsNotEmpty,
@@ -6,9 +10,6 @@ import {
   IsString,
   IsPositive,
 } from 'class-validator';
-import { Type } from 'class-transformer';
-import { OrderStatus, OrderPriority } from '../entities/order.entity';
-
 export class CreateOrderDto {
   @IsNumber()
   @IsPositive()
@@ -36,7 +37,7 @@ export class CreateOrderDto {
   @IsOptional()
   shipping_address?: string;
 
-  @IsString()
-  @IsOptional()
-  billing_address?: string;
+  // @IsString()
+  // @IsOptional()
+  // billing_address?: string;
 }

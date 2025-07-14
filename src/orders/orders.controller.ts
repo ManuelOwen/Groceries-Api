@@ -3,13 +3,13 @@ import {
   Get,
   Post,
   Body,
-  Patch,
+  // Patch,
   Param,
   Delete,
   UseGuards,
   Put,
   ParseIntPipe,
-  Query,
+  // Query,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -84,6 +84,14 @@ export class OrdersController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateOrderDto: UpdateOrderDto,
   ): Promise<ApiResponse<Order>> {
+    console.log('[UpdateOrder] Received update data:', JSON.stringify(updateOrderDto, null, 2));
+    console.log('[UpdateOrder] Order ID:', id);
+    console.log('[UpdateOrder] Data types:', {
+      total_amount: typeof updateOrderDto.total_amount,
+      user_id: typeof updateOrderDto.user_id,
+      status: typeof updateOrderDto.status,
+      priority: typeof updateOrderDto.priority,
+    });
     return this.ordersService.updateOrder(id, updateOrderDto);
   }
 

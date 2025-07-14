@@ -310,7 +310,7 @@ export class AuthService {
   async signIn(createAuthDto: LoginDto) {
     const foundUser = await this.userRepository.findOne({
       where: { email: createAuthDto.email },
-      select: ['id', 'email', 'password', 'role'], // role included for authorization
+      select: ['id', 'email', 'password', 'role', 'fullName', 'address', 'phoneNumber', 'created_at', 'updated_at'], // include all relevant fields
     });
     if (!foundUser) {
       throw new NotFoundException(
@@ -341,8 +341,16 @@ export class AuthService {
     return {
       accessToken,
       refreshToken,
-      role: foundUser.role,
-      id: foundUser.id,
+      user: {
+        id: foundUser.id,
+        email: foundUser.email,
+        fullName: foundUser.fullName,
+        address: foundUser.address,
+        phoneNumber: foundUser.phoneNumber,
+        role: foundUser.role, // should be 'user', 'admin', or 'driver'
+        created_at: foundUser.created_at,
+        updated_at: foundUser.updated_at,
+      },
     };
   }
 
