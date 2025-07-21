@@ -36,6 +36,9 @@ export class CreateOrderDto {
   @IsOptional()
   shipping_address?: string;
 
+  @IsOptional()
+  items?: any[];
+
   // @IsString()
   // @IsOptional()
   // billing_address?: string;

@@ -6,6 +6,7 @@ import {
   JoinColumn,
   BeforeInsert,
   BeforeUpdate,
+  CreateDateColumn,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Driver } from 'src/drivers/entities/driver.entity';
@@ -59,11 +60,19 @@ export class Order {
 
   @Column({ type: 'timestamp', nullable: true })
   shipped_at: Date;
+  // @Column({type:'timestamp', nullable:true})
+  // crea
 
   @Column({ type: 'timestamp', nullable: true })
   delivered_at: Date;
   // @Column({ nullable: true })
   // driver_id: number;
+
+  @Column({ type: 'json', nullable: true })
+  items: any[];
+
+  @CreateDateColumn()
+  created_at: Date;
 
   @ManyToOne(() => Driver, { eager: false })
   @JoinColumn({ name: 'driver_id' })

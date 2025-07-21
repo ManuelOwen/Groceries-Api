@@ -19,6 +19,7 @@ import { RolesGuard } from 'src/auth/guards';
 import { AtGuard } from 'src/auth/token/token.guard';
 import { Public, Roles } from 'src/auth/decorators';
 import { Role } from 'src/users/entities/user.entity';
+import fetch from 'node-fetch';
 
 // Define ApiResponse interface to match the service
 interface ApiResponse<T = any> {
@@ -76,5 +77,16 @@ export class LocationController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ApiResponse<null>> {
     return this.locationService.deleteLocation(id);
+  }
+
+  // Proxy endpoint for Kenya locations JSON
+  @Get('kenya-locations')
+  @Public()
+  async proxyKenyaLocations() {
+    const response = await fetch('https://kenya-locations.web.app/locations.json');
+    if (!response.ok) {
+      throw new Error('Failed to fetch Kenya locations data');
+    }
+    return await response.json();
   }
 }

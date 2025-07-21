@@ -24,6 +24,10 @@ export class CreatePaymentDto {
   @Type(() => Number)
   user_id: number;
 
+  @IsString()
+  @IsNotEmpty()
+  email: string;
+
   @IsEnum(PaymentStatus)
   @IsOptional()
   status?: PaymentStatus;

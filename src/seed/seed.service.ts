@@ -86,6 +86,14 @@ export class SeedService {
           phoneNumber: '+254756665443',
           role: Role.ADMIN,
         },
+        {
+          email: 'driver@example.com',
+          fullName: 'Test Driver',
+          address: '789 Driver St, City, Country',
+          password: hashedPassword,
+          phoneNumber: '+254712345678',
+          role: Role.DRIVER,
+        },
       ];
 
       // Seed locations
@@ -199,6 +207,24 @@ export class SeedService {
           billing_address: '456 Elm St, City, Country',
           notes: 'Thank you for your order',
           user_id: savedUsers[1].id, // Mari User (Admin)
+        },
+        {
+          total_amount: 75.25,
+          status: OrderStatus.PENDING,
+          priority: OrderPriority.NORMAL,
+          shipping_address: '789 Driver St, City, Country',
+          billing_address: '789 Driver St, City, Country',
+          notes: 'Driver test order 1',
+          user_id: savedUsers[2].id, // Test Driver
+        },
+        {
+          total_amount: 150.0,
+          status: OrderStatus.CONFIRMED,
+          priority: OrderPriority.HIGH,
+          shipping_address: '789 Driver St, City, Country',
+          billing_address: '789 Driver St, City, Country',
+          notes: 'Driver test order 2',
+          user_id: savedUsers[2].id, // Test Driver
         },
       ];
 

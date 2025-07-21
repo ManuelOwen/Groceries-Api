@@ -16,9 +16,9 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User, Role } from './entities/user.entity';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import { RolesGuard } from 'src/auth/guards';
-import { AtGuard } from 'src/auth/token/token.guard';
-import { Public, Roles } from 'src/auth/decorators';
+import { RolesGuard } from '../auth/guards';
+import { AtGuard } from '../auth/token/token.guard';
+import { Public, Roles } from '../auth/decorators';
 
 // Define ApiResponse interface to match the service
 interface ApiResponse<T = any> {
@@ -57,7 +57,7 @@ export class UsersController {
   }
   //  update user by id
   @Put(':id')
-  @Roles(Role.ADMIN, Role.USER) // Admins can update any user, users can update themselves (logic in service)
+  @Roles(Role.ADMIN, Role.USER, Role.DRIVER) // Admins can update any user, users can update themselves (logic in service)
   async updateUser(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,

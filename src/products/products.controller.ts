@@ -17,10 +17,10 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './entities/product.entity';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import { RolesGuard } from 'src/auth/guards';
-import { AtGuard } from 'src/auth/token/token.guard';
-import { Public, Roles } from 'src/auth/decorators';
-import { Role } from 'src/users/entities/user.entity';
+import { RolesGuard } from '../auth/guards';
+import { AtGuard } from '../auth/token/token.guard';
+import { Public, Roles } from '../auth/decorators';
+import { Role } from '../users/entities/user.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerCloudinaryStorage } from '../config/multer-cloudinary.config';
 

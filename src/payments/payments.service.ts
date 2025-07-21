@@ -16,6 +16,15 @@ interface ApiResponse<T = any> {
   data?: T;
   error?: string;
 }
+interface PaystackTransactionResponse {
+  status: boolean;
+  message: string;
+  data: {
+    authorization_url: string;
+    access_code: string;
+    reference: string;
+  };
+}
 
 @Injectable()
 export class PaymentsService {
@@ -24,18 +33,30 @@ export class PaymentsService {
     private readonly paymentRepository: Repository<Payment>,
   ) {}
 
+  private apiKey = process.env.PAYSTACK_API;
+  private paystackUrl = 'https://api.paystack.co';
   // create payment
   async createPayment(
     createPaymentDto: CreatePaymentDto,
-  ): Promise<ApiResponse<Payment>> {
+  ): Promise<ApiResponse<Payment> & { [key: string]: any }> {
     try {
+      console.log('Initialized Transaction');
       const newPayment = this.paymentRepository.create(createPaymentDto);
       const savedPayment = await this.paymentRepository.save(newPayment);
-
+      const paystackRes: PaystackTransactionResponse =
+        await this.initializePayment(
+          createPaymentDto.email,
+          createPaymentDto.amount * 100,
+          savedPayment.reference_number,
+        );
+      console.log('paystackRes', paystackRes);
       return {
         success: true,
         message: 'Payment created successfully',
         data: savedPayment,
+        authorization_url: paystackRes.data.authorization_url,
+        access_code: paystackRes.data.access_code,
+        reference: paystackRes.data.reference,
       };
     } catch (error) {
       return {
@@ -217,5 +238,31 @@ export class PaymentsService {
         error: error.message,
       };
     }
+  }
+
+  // payment through paystack
+  private async initializePayment(
+    email: string,
+    amount: number,
+    reference: string,
+  ) {
+    console.log(this.apiKey);
+    const response = await fetch(`${this.paystackUrl}/transaction/initialize`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${this.apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email,
+        amount,
+        reference,
+      }),
+    });
+    const jsonResponse = await response.json();
+    if (!response.ok) {
+      throw new Error(await response.json());
+    }
+    return jsonResponse;
   }
 }

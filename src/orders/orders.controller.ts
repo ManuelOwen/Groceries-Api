@@ -9,6 +9,8 @@ import {
   UseGuards,
   Put,
   ParseIntPipe,
+  Request,
+  ForbiddenException,
   // Query,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
@@ -16,10 +18,10 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { Order, OrderStatus } from './entities/order.entity';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import { RolesGuard } from 'src/auth/guards';
-import { AtGuard } from 'src/auth/token/token.guard';
-import { Public, Roles } from 'src/auth/decorators';
-import { Role } from 'src/users/entities/user.entity';
+import { RolesGuard } from '../auth/guards';
+import { AtGuard } from '../auth/token/token.guard';
+import { Public, Roles } from '../auth/decorators';
+import { Role } from '../users/entities/user.entity';
 
 // Define ApiResponse interface to match the service
 interface ApiResponse<T = any> {
@@ -61,10 +63,25 @@ export class OrdersController {
 
   // get orders by user id
   @Get('user/:userId')
-  @Roles(Role.ADMIN, Role.USER) // Admins and users can view user orders
+  @Roles(Role.ADMIN, Role.USER, Role.DRIVER) // Allow drivers to access orders too
   async getOrdersByUser(
     @Param('userId', ParseIntPipe) userId: number,
+    @Request() req: any,
   ): Promise<ApiResponse<Order[]>> {
+    const currentUser = req.user;
+    console.log('🔍 getOrdersByUser - Current user:', currentUser);
+    console.log('🔍 getOrdersByUser - Requested user ID:', userId);
+    console.log('🔍 getOrdersByUser - User role:', currentUser?.role);
+
+    // If user is not admin and not requesting their own orders, deny access
+    if (currentUser.role !== Role.ADMIN && currentUser.id !== userId) {
+      console.log(
+        "❌ getOrdersByUser - Permission denied: User trying to access another user's orders",
+      );
+      throw new ForbiddenException('You can only access your own orders');
+    }
+
+    console.log('✅ getOrdersByUser - Permission granted');
     return this.ordersService.getOrdersByUserId(userId);
   }
 
@@ -79,7 +96,7 @@ export class OrdersController {
 
   // update order by id
   @Put(':id')
-  @Roles(Role.ADMIN, Role.DRIVER) // Admins and drivers can update orders
+  @Roles(Role.ADMIN, Role.USER, Role.DRIVER) // Admins, users, and drivers can update orders
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateOrderDto: UpdateOrderDto,
@@ -105,5 +122,14 @@ export class OrdersController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ApiResponse<null>> {
     return this.ordersService.deleteOrder(id);
+  }
+  //  get orders by userid and role
+  @Get('user/:userId/role/:role')
+  @Roles(Role.ADMIN, Role.DRIVER) // Only admins can view orders by user and role
+  async getOrdersByUserAndRole(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('role') role: Role,
+  ): Promise<ApiResponse<Order[]>> {
+    return this.ordersService.getOrdersByUserIdAndRole(userId, role);
   }
 }

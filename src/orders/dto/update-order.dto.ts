@@ -8,4 +8,7 @@ export class UpdateOrderDto extends PartialType(CreateOrderDto) {
 
   @IsOptional()
   delivered_at?: Date;
+
+  @IsOptional()
+  items?: any[];
 }

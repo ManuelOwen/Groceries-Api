@@ -75,14 +75,6 @@ async function bootstrap() {
       `,
     )
     .setVersion('1.0')
-    // .addTag('users, authentication and user management')
-    // .addTag('products, product management and categories')
-    // .addTag('orders, order management')
-    // .addTag('payments, payment processing')
-    // .addTag('feedbacks, user feedback management')
-    // .addTag('customers-support, user support')
-    // .addTag('location, delivery location management')
-    // .addTag('seed, database seeding')
     .addBearerAuth()
     .addServer('http://localhost:8000', 'Local Development Server')
     .build();

@@ -8,7 +8,7 @@ import {
   MinLength,
   MaxLength,
   Matches,
- 
+  IsUrl,
 } from 'class-validator';
 
 import { Role } from '../entities/user.entity';
@@ -27,6 +27,12 @@ export class CreateUserDto {
   @IsNotEmpty({ message: 'Email is required' })
   @MaxLength(255, { message: 'Email must not exceed 255 characters' })
   email: string;
+
+  // @IsOptional()
+  // @IsString()
+  // @IsUrl({}, { message: 'Profile image must be a valid URL' })
+  // @MaxLength(500, { message: 'Profile image URL must not exceed 500 characters' })
+  // profileImage?: string;
 
   @IsString()
   @IsNotEmpty({ message: 'Address is required' })

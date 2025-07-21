@@ -19,6 +19,11 @@ export class CreateProductDto {
   @Min(0)
   price: number;
 
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  quantity: number;
+
   @IsBoolean()
   @IsOptional()
   inStock?: boolean;

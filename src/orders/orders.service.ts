@@ -1,3 +1,5 @@
+import { Driver } from '../drivers/entities/driver.entity';
+import { User } from '../users/entities/user.entity';
 import {
   Injectable,
   ConflictException,
@@ -8,6 +10,7 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 import { Order, OrderStatus } from './entities/order.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Product } from '../products/entities/product.entity';
 
 // Response interfaces
 interface ApiResponse<T = any> {
@@ -22,6 +25,8 @@ export class OrdersService {
   constructor(
     @InjectRepository(Order)
     private readonly orderRepository: Repository<Order>,
+    @InjectRepository(Product)
+    private readonly productRepository: Repository<Product>,
   ) {}
 
   // create order
@@ -29,7 +34,31 @@ export class OrdersService {
     createOrderDto: CreateOrderDto,
   ): Promise<ApiResponse<Order>> {
     try {
-      const newOrder = this.orderRepository.create(createOrderDto);
+      // Add product_name and price to each item in the order
+      let itemsWithDetails: any[] = [];
+      if (Array.isArray(createOrderDto.items)) {
+        itemsWithDetails = await Promise.all(
+          createOrderDto.items.map(async (item) => {
+            const product = await this.productRepository.findOne({
+              where: { id: item.id },
+            });
+            if (!product) {
+              throw new NotFoundException(
+                `Product with id ${item.id} not found`,
+              );
+            }
+            return {
+              ...item,
+              product_name: product.product_name,
+              price: product.price,
+            };
+          }),
+        );
+      }
+      const newOrder = this.orderRepository.create({
+        ...createOrderDto,
+        items: itemsWithDetails,
+      });
       const savedOrder = await this.orderRepository.save(newOrder);
 
       return {
@@ -127,6 +156,34 @@ export class OrdersService {
       // Handle status-specific updates (entity hooks will also handle this)
       const updateData = { ...updateOrderDto };
 
+      // If status is being set to CONFIRMED, decrement product quantities
+      if (
+        updateOrderDto.status === OrderStatus.CONFIRMED &&
+        Array.isArray(updateOrderDto.items)
+      ) {
+        for (const item of updateOrderDto.items) {
+          const product = await this.productRepository.findOne({
+            where: { id: item.id },
+          });
+          if (!product) {
+            throw new NotFoundException(`Product with id ${item.id} not found`);
+          }
+          if (product.quantity < item.quantity) {
+            throw new ConflictException(
+              `Product '${product.product_name}' is out of stock or does not have enough quantity.`,
+            );
+          }
+        }
+        // All products have enough stock, now decrement
+        for (const item of updateOrderDto.items) {
+          await this.productRepository.decrement(
+            { id: item.id },
+            'quantity',
+            item.quantity,
+          );
+        }
+      }
+
       // Manual backup logic for timestamp setting (in case entity hooks don't fire)
       if (
         updateOrderDto.status === OrderStatus.SHIPPED &&
@@ -221,6 +278,7 @@ export class OrdersService {
             id: true,
             fullName: true,
             email: true,
+            role: true,
           },
         },
       });
@@ -297,5 +355,41 @@ export class OrdersService {
       };
     }
   }
-  // get orders allocated to driver
+  // get ordersbyuser id and role
+  async getOrdersByUserIdAndRole(
+    user_id: number,
+    role: string,
+  ): Promise<ApiResponse<Order[]>> {
+    try {
+      const orders = await this.orderRepository.find({
+        where: {
+          user: {
+            id: user_id,
+            role: role as any, // Cast to 'any' if Role is an enum, or use the correct type
+          },
+        },
+        relations: ['user'],
+        select: {
+          user: {
+            id: true,
+            fullName: true,
+            email: true,
+            role: true,
+          },
+        },
+      });
+
+      return {
+        success: true,
+        message: `Found ${orders.length} orders for user ${user_id} with role ${role}`,
+        data: orders,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Failed to fetch orders for user ${user_id} with role ${role}`,
+        error: error.message,
+      };
+    }
+  }
 }

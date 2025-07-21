@@ -262,7 +262,7 @@ export class UsersService {
       this.logger.log(`Fetching user with ID: ${id}`);
 
       const user = await this.userRepository.findOne({
-         // Exclude soft-deleted users
+        // Exclude soft-deleted users
         select: [
           'id',
           'fullName',

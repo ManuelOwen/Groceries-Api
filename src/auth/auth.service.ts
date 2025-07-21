@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Role, User } from 'src/users/entities/user.entity';
+import { Role, User } from '../users/entities/user.entity';
 import { Repository, QueryFailedError } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
@@ -368,7 +368,7 @@ export class AuthService {
   async signOut(id: number) {
     // Fixed: userId should be number for consistency
     const res = await this.userRepository.update(id, {
-      hashedRefreshToken: null,
+      // hashedRefreshToken: null,
     });
 
     if (res.affected === 0) {
@@ -389,13 +389,13 @@ export class AuthService {
     }
 
     // if (!foundUser.hashedRefreshToken) {
-      throw new NotFoundException('No refresh token found');
-    }
+    throw new NotFoundException('No refresh token found');
   }
-    // const refreshTokenMatches = await bcrypt.compare(
-    //   refreshToken,
-    //   foundUser.hashedRefreshToken,
-    // );
+}
+// const refreshTokenMatches = await bcrypt.compare(
+//   refreshToken,
+//   foundUser.hashedRefreshToken,
+// );
 
 //     if (!refreshTokenMatches) {
 //       throw new NotFoundException('Invalid refresh token');
