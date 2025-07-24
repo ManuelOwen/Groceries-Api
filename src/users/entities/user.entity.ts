@@ -2,9 +2,9 @@ import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-  DeleteDateColumn,
+  // CreateDateColumn,
+  // UpdateDateColumn,
+  // DeleteDateColumn,
   BeforeInsert,
   BeforeUpdate,
 } from 'typeorm';

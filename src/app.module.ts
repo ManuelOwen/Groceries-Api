@@ -19,6 +19,8 @@ import { OrdersModule } from './orders/orders.module';
 import { FeedbacksModule } from './feedbacks/feedbacks.module';
 import { CustomersSupportModule } from './customers-support/customers-support.module';
 import { DriversModule } from './drivers/drivers.module';
+import { NodemailerModule } from './nodemailer/nodemailer.module';
+
 
 @Module({
   imports: [
@@ -44,6 +46,8 @@ import { DriversModule } from './drivers/drivers.module';
     FeedbacksModule,
     CustomersSupportModule,
     DriversModule,
+    NodemailerModule,
+    
   ],
   controllers: [AppController],
   providers: [
