@@ -11,4 +11,7 @@ export class UpdateOrderDto extends PartialType(CreateOrderDto) {
 
   @IsOptional()
   items?: any[];
+
+  @IsOptional()
+  assigned_driver_id?: number;
 }

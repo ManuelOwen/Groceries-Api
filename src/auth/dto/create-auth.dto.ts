@@ -40,7 +40,7 @@ export class CreateAuthDto {
 
   @IsString()
   @IsNotEmpty({ message: 'Phone number is required' })
-  @Matches(/^[\+]?[1-9][\d]{0,15}$/, {
+  @Matches(/^[+]?[1-9][\d]{0,15}$/, {
     message: 'Please provide a valid phone number',
   })
   phoneNumber: string;

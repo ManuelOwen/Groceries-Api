@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  ConflictException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, InternalServerErrorException, Logger } from '@nestjs/common';
 import { CreateDriverDto } from './dto/create-driver.dto';
 import { UpdateDriverDto } from './dto/update-driver.dto';
 import {
@@ -24,6 +20,8 @@ interface ApiResponse<T = any> {
 
 @Injectable()
 export class DriversService {
+  private readonly logger = new Logger(DriversService.name);
+
   // Update the constructor
   constructor(
     @InjectRepository(Driver)
@@ -44,11 +42,15 @@ export class DriversService {
         data: savedDriver,
       };
     } catch (error) {
-      return {
-        success: false,
+      this.logger.error('Failed to create driver', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : 'No stack trace',
+        driverData: createDriverDto,
+      });
+      throw new InternalServerErrorException({
         message: 'Failed to create driver',
-        error: error.message,
-      };
+        suggestion: 'Please try again later or contact support',
+      });
     }
   }
 
@@ -73,11 +75,14 @@ export class DriversService {
         data: drivers,
       };
     } catch (error) {
-      return {
-        success: false,
+      this.logger.error('Failed to fetch drivers', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : 'No stack trace',
+      });
+      throw new InternalServerErrorException({
         message: 'Failed to fetch drivers',
-        error: error.message,
-      };
+        suggestion: 'Please try again later or contact support',
+      });
     }
   }
 
@@ -107,14 +112,15 @@ export class DriversService {
         data: driver,
       };
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      return {
-        success: false,
-        message: `Failed to find driver with id ${id}`,
-        error: error.message,
-      };
+      this.logger.error(`Failed to fetch driver with ID: ${id}`, {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : 'No stack trace',
+        driverId: id,
+      });
+      throw new InternalServerErrorException({
+        message: 'Failed to fetch driver',
+        suggestion: 'Please try again later or contact support',
+      });
     }
   }
 
@@ -168,14 +174,16 @@ export class DriversService {
         data: updatedDriver,
       };
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      return {
-        success: false,
-        message: `Failed to update driver with id ${id}`,
-        error: error.message,
-      };
+      this.logger.error(`Failed to update driver with ID: ${id}`, {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : 'No stack trace',
+        driverId: id,
+        updateData: updateDriverDto,
+      });
+      throw new InternalServerErrorException({
+        message: 'Failed to update driver',
+        suggestion: 'Please try again later or contact support',
+      });
     }
   }
 

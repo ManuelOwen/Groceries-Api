@@ -54,7 +54,7 @@ export class CreateCustomersSupportDto {
 
   @IsString()
   @IsOptional()
-  @Matches(/^[\+]?[1-9][\d]{0,15}$/, {
+  @Matches(/^\+254[0-9]{9}$/, {
     message: 'Please provide a valid phone number',
   })
   contact_phone?: string;

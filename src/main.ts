@@ -1,12 +1,20 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import helmet from 'helmet';
 import { ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { AllExceptionsFilter } from './common/filters/http-exception.filter';
+import { ConfigService } from '@nestjs/config';
 import { join } from 'path';
 import * as express from 'express';
+import helmet from 'helmet';
+import { AppModule } from './app.module';
+import { AllExceptionsFilter } from './common/filters/http-exception.filter';
+import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
+import { ProductsModule } from './products/products.module';
+import { OrdersModule } from './orders/orders.module';
+import { PaymentsModule } from './payments/payments.module';
+import { FeedbacksModule } from './feedbacks/feedbacks.module';
+import { CustomersSupportModule } from './customers-support/customers-support.module';
+import { LocationModule } from './location/location.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -80,15 +88,14 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config, {
     include: [
-      require('./users/users.module').UsersModule,
-      require('./auth/auth.module').AuthModule,
-      require('./products/products.module').ProductsModule,
-      require('./orders/orders.module').OrdersModule,
-      require('./payments/payments.module').PaymentsModule,
-      require('./feedbacks/feedbacks.module').FeedbacksModule,
-      require('./customers-support/customers-support.module')
-        .CustomersSupportModule,
-      require('./location/location.module').LocationModule,
+      UsersModule,
+      AuthModule,
+      ProductsModule,
+      OrdersModule,
+      PaymentsModule,
+      FeedbacksModule,
+      CustomersSupportModule,
+      LocationModule,
     ],
   });
   SwaggerModule.setup('docs', app, document, {
@@ -119,6 +126,3 @@ async function bootstrap() {
   console.log(`Server is running on port ${PORT}`);
 }
 bootstrap();
-function addServer(arg0: string, arg1: string) {
-  throw new Error('Function not implemented.');
-}

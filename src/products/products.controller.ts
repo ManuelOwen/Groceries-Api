@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   UseGuards,
@@ -101,7 +100,7 @@ export class ProductsController {
       limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
     }),
   )
-  async uploadProductImage(@UploadedFile() file: Express.Multer.File) {
+  uploadProductImage(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
       return { success: false, message: 'No file uploaded' };
     }

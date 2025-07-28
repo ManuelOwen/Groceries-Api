@@ -10,6 +10,7 @@ import {
   UseGuards,
   Put,
   ParseIntPipe,
+  Request,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -71,5 +72,21 @@ export class UsersController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ApiResponse<null>> {
     return this.usersService.deleteUser(id);
+  }
+
+  @Get('role/:role')
+  @Roles(Role.ADMIN) // Only admins can fetch users by role
+  async getUsersByRole(@Param('role') role: string): Promise<ApiResponse<User[]>> {
+    return this.usersService.findByRole(role);
+  }
+
+  @Get('driver/:driverId/for-order/:orderId')
+  @Roles(Role.ADMIN, Role.USER)
+  async getDriverForOrder(
+    @Param('driverId') driverId: number,
+    @Param('orderId') orderId: number,
+    @Request() req: any
+  ): Promise<ApiResponse<User>> {
+    return this.usersService.getDriverForOrder(driverId, orderId, req.user);
   }
 }

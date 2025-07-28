@@ -91,11 +91,11 @@ export class AuthService {
       // Verify the token was saved
       const updatedUser = await this.userRepository.findOne({
         where: { id },
-        // select: ['id', 'hashedRefreshToken'],
+        select: ['id', 'hashedRefreshToken'],
       });
       console.log(
         `Verification - User ${id} hashedRefreshToken:`,
-        // updatedUser?.hashedRefreshToken,
+        updatedUser?.hashedRefreshToken,
       );
     } catch (error) {
       console.error('Error saving refresh token:', error);
@@ -185,7 +185,7 @@ export class AuthService {
       } catch (hashError) {
         this.logger.error(
           'Password hashing failed during registration',
-          hashError.stack,
+          hashError instanceof Error ? hashError.stack : 'Unknown error',
         );
         throw new InternalServerErrorException('Failed to secure password');
       }
@@ -255,8 +255,8 @@ export class AuthService {
         this.logger.error(
           'Database save operation failed during registration',
           {
-            error: saveError.message,
-            stack: saveError.stack,
+            error: saveError instanceof Error ? saveError.message : 'Unknown error',
+            stack: saveError instanceof Error ? saveError.stack : 'No stack trace',
             userData: { email, fullName, phoneNumber },
           },
         );
@@ -289,13 +289,13 @@ export class AuthService {
 
       // Handle unexpected errors
       this.logger.error('Unexpected error during user registration', {
-        error: error.message,
-        stack: error.stack,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : 'No stack trace',
         userData: { email, fullName, phoneNumber },
       });
       this.logger.error('Unexpected error during user registration', {
-        error: error.message,
-        stack: error.stack,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : 'No stack trace',
         userData: { email },
       });
 
@@ -378,7 +378,7 @@ export class AuthService {
   }
 
   // Method to refresh tokens
-  async refreshTokens(id: number, refreshToken: string) {
+  async refreshTokens(id: number, _refreshToken: string) {
     const foundUser = await this.userRepository.findOne({
       where: { id: id },
       // select: ['id', 'email', 'role', 'hashedRefreshToken'],

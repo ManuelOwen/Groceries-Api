@@ -5,15 +5,18 @@ import {
   BadRequestException,
   InternalServerErrorException,
   Logger,
+  ForbiddenException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
-import { Repository, QueryFailedError, IsNull } from 'typeorm';
+import { Repository, QueryFailedError } from 'typeorm';
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
+import { Role } from './entities/user.entity';
+import { Order } from '../orders/entities/order.entity';
 
 // Response interfaces
 interface ApiResponse<T = any> {
@@ -30,17 +33,19 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Order)
+    private readonly orderRepository: Repository<Order>,
   ) {}
 
   // create user
   async createUser(createUserDto: CreateUserDto): Promise<ApiResponse<User>> {
-    const { email, password, fullName, phoneNumber } = createUserDto;
+    const { email, password: userPassword, fullName, phoneNumber } = createUserDto;
 
     try {
       // Input validation
-      if (!email || !password || !fullName) {
+      if (!email || !userPassword || !fullName) {
         this.logger.warn(
-          `Invalid input data for user creation: ${JSON.stringify({ email: !!email, password: !!password, fullName: !!fullName })}`,
+          `Invalid input data for user creation: ${JSON.stringify({ email: !!email, password: !!userPassword, fullName: !!fullName })}`,
         );
         throw new BadRequestException(
           'Email, password, and full name are required',
@@ -55,7 +60,7 @@ export class UsersService {
       }
 
       // Validate password strength
-      if (password.length < 6) {
+      if (userPassword.length < 6) {
         this.logger.warn('Password too short');
         throw new BadRequestException(
           'Password must be at least 6 characters long',
@@ -101,7 +106,7 @@ export class UsersService {
       // Hash password with error handling
       let hashedPassword: string;
       try {
-        hashedPassword = await bcrypt.hash(password, 12); // Increased salt rounds for better security
+        hashedPassword = await bcrypt.hash(userPassword, 12); // Increased salt rounds for better security
       } catch (hashError) {
         this.logger.error('Password hashing failed', hashError.stack);
         throw new InternalServerErrorException('Failed to secure password');
@@ -182,7 +187,7 @@ export class UsersService {
       }
 
       // Remove password from response
-      const { password: _, ...userWithoutPassword } = savedUser;
+      const { password, ...userWithoutPassword } = savedUser;
 
       return {
         success: true,
@@ -262,6 +267,7 @@ export class UsersService {
       this.logger.log(`Fetching user with ID: ${id}`);
 
       const user = await this.userRepository.findOne({
+        where: { id },
         // Exclude soft-deleted users
         select: [
           'id',
@@ -505,7 +511,7 @@ export class UsersService {
       }
 
       // Remove password from response
-      const { password: _, ...userWithoutPassword } = updatedUser;
+      const { password, ...userWithoutPassword } = updatedUser;
 
       return {
         success: true,
@@ -534,6 +540,69 @@ export class UsersService {
       });
     }
   }
+
+  async findByRole(role: string): Promise<ApiResponse<User[]>> {
+    try {
+      const users = await this.userRepository.find({
+        where: { role: role as Role }, // Cast role to Role enum
+        select: ['id', 'fullName', 'email', 'address', 'phoneNumber', 'role'],
+      });
+      return {
+        success: true,
+        message: `Found ${users.length} users with role ${role}`,
+        data: users,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException({
+        message: 'Failed to retrieve users by role',
+        suggestion: 'Please try again later or contact support',
+      });
+    }
+  }
+
+  async getDriverForOrder(driverId: number, orderId: number, requestingUser: any): Promise<ApiResponse<User>> {
+    try {
+      // First, verify the order belongs to the requesting user (unless they're admin)
+      const order = await this.orderRepository.findOne({
+        where: { id: orderId },
+        relations: ['user'],
+      });
+
+      if (!order) {
+        throw new NotFoundException('Order not found');
+      }
+
+      // Check if user owns the order or is admin
+      if (requestingUser.role !== 'admin' && order.user_id !== requestingUser.id) {
+        throw new ForbiddenException('You can only view driver info for your own orders');
+      }
+
+      // Now fetch the driver information
+      const driver = await this.userRepository.findOne({
+        where: { id: driverId, role: Role.DRIVER },
+        select: ['id', 'fullName', 'email', 'phoneNumber', 'role'],
+      });
+
+      if (!driver) {
+        throw new NotFoundException('Driver not found');
+      }
+
+      return {
+        success: true,
+        message: 'Driver information retrieved successfully',
+        data: driver,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof ForbiddenException) {
+        throw error;
+      }
+      throw new InternalServerErrorException({
+        message: 'Failed to retrieve driver information',
+        suggestion: 'Please try again later or contact support',
+      });
+    }
+  }
+
   // delete user by id (soft delete)
   async deleteUser(id: number): Promise<ApiResponse<null>> {
     this.logger.debug(`[SoftDelete] Called deleteUser for ID: ${id}`);
@@ -564,7 +633,7 @@ export class UsersService {
       }
 
       // Prevent deletion of admin users (optional business rule)
-      if (existingUser.role === 'admin') {
+      if (existingUser.role === Role.ADMIN) {
         this.logger.warn(
           `[SoftDelete] Attempt to delete admin user with ID: ${id}`,
         );

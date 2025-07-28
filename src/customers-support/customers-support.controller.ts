@@ -16,7 +16,7 @@ import { CustomersSupport } from './entities/customers-support.entity';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { RolesGuard } from 'src/auth/guards';
 import { AtGuard } from 'src/auth/token/token.guard';
-import { Public, Roles } from 'src/auth/decorators';
+import { Roles } from 'src/auth/decorators';
 import { Role } from '../users/entities/user.entity';
 
 // Define ApiResponse interface to match the service

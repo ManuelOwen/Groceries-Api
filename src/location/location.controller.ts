@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   UseGuards,
@@ -83,7 +82,9 @@ export class LocationController {
   @Get('kenya-locations')
   @Public()
   async proxyKenyaLocations() {
-    const response = await fetch('https://kenya-locations.web.app/locations.json');
+    const response = await fetch(
+      'https://kenya-locations.web.app/locations.json',
+    );
     if (!response.ok) {
       throw new Error('Failed to fetch Kenya locations data');
     }

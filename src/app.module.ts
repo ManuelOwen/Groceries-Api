@@ -21,7 +21,6 @@ import { CustomersSupportModule } from './customers-support/customers-support.mo
 import { DriversModule } from './drivers/drivers.module';
 import { NodemailerModule } from './nodemailer/nodemailer.module';
 
-
 @Module({
   imports: [
     UsersModule,
@@ -47,7 +46,6 @@ import { NodemailerModule } from './nodemailer/nodemailer.module';
     CustomersSupportModule,
     DriversModule,
     NodemailerModule,
-    
   ],
   controllers: [AppController],
   providers: [

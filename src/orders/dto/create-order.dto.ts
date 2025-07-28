@@ -39,6 +39,9 @@ export class CreateOrderDto {
   @IsOptional()
   items?: any[];
 
+  @IsOptional()
+  assigned_driver_id?: number;
+
   // @IsString()
   // @IsOptional()
   // billing_address?: string;

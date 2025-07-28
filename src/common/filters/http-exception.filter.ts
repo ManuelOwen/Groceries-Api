@@ -32,12 +32,13 @@ export class AllExceptionsFilter implements ExceptionFilter {
         error = exception.name;
       } else if (typeof exceptionResponse === 'object') {
         // If validation errors are present, include them in the response
-        if (Array.isArray((exceptionResponse as any).message)) {
-          message = (exceptionResponse as any).message;
+        const responseObj = exceptionResponse as Record<string, any>;
+        if (Array.isArray(responseObj.message)) {
+          message = responseObj.message;
         } else {
-          message = (exceptionResponse as any).message || exceptionResponse;
+          message = responseObj.message || exceptionResponse;
         }
-        error = (exceptionResponse as any).error || exception.name;
+        error = responseObj.error || exception.name;
       }
     } else if (exception instanceof QueryFailedError) {
       // Handle database errors

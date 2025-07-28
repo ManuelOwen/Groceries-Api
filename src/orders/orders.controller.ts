@@ -3,7 +3,7 @@ import {
   Get,
   Post,
   Body,
-  // Patch,
+  Patch,
   Param,
   Delete,
   UseGuards,
@@ -22,6 +22,7 @@ import { RolesGuard } from '../auth/guards';
 import { AtGuard } from '../auth/token/token.guard';
 import { Public, Roles } from '../auth/decorators';
 import { Role } from '../users/entities/user.entity';
+import { UsersService } from '../users/users.service';
 
 // Define ApiResponse interface to match the service
 interface ApiResponse<T = any> {
@@ -35,7 +36,10 @@ interface ApiResponse<T = any> {
 @ApiBearerAuth()
 @UseGuards(AtGuard, RolesGuard) // Use AtGuard for authentication and RolesGuard for authorization
 export class OrdersController {
-  constructor(private readonly ordersService: OrdersService) {}
+  constructor(
+    private readonly ordersService: OrdersService,
+    private readonly usersService: UsersService,
+  ) {}
 
   // create order
   @Post()
@@ -131,5 +135,20 @@ export class OrdersController {
     @Param('role') role: Role,
   ): Promise<ApiResponse<Order[]>> {
     return this.ordersService.getOrdersByUserIdAndRole(userId, role);
+  }
+
+  @Patch(':id/assign-driver')
+  @Roles(Role.ADMIN)
+  async assignDriver(
+    @Param('id') id: number,
+    @Body('driver_id') driver_id: number,
+  ): Promise<any> {
+    // Check if the user is a driver
+    const driverResponse = await this.usersService.getUserById(driver_id);
+    const driver = driverResponse.data;
+    if (!driver || driver.role !== 'driver') {
+      return { success: false, message: 'User is not a driver' };
+    }
+    return this.ordersService.assignDriverToOrder(id, driver_id);
   }
 }

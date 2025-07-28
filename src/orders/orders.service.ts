@@ -1,5 +1,3 @@
-import { Driver } from '../drivers/entities/driver.entity';
-import { User } from '../users/entities/user.entity';
 import {
   Injectable,
   ConflictException,
@@ -79,25 +77,18 @@ export class OrdersService {
   async findAll(): Promise<ApiResponse<Order[]>> {
     try {
       const orders = await this.orderRepository.find({
-        relations: ['user'],
-        select: {
-          user: {
-            id: true,
-            fullName: true,
-            email: true,
-          },
-        },
+        relations: ['user', 'assigned_driver'],
+        order: { created_at: 'DESC' },
       });
-
       return {
         success: true,
-        message: `Found ${orders.length} orders`,
+        message: 'Orders retrieved successfully',
         data: orders,
       };
     } catch (error) {
       return {
         success: false,
-        message: 'Failed to fetch orders',
+        message: 'Failed to retrieve orders',
         error: error.message,
       };
     }
@@ -390,6 +381,20 @@ export class OrdersService {
         message: `Failed to fetch orders for user ${user_id} with role ${role}`,
         error: error.message,
       };
+    }
+  }
+
+  async assignDriverToOrder(orderId: number, driverId: number): Promise<ApiResponse<Order>> {
+    try {
+      const order = await this.orderRepository.findOne({ where: { id: orderId } });
+      if (!order) {
+        return { success: false, message: 'Order not found' };
+      }
+      order.assigned_driver_id = driverId;
+      await this.orderRepository.save(order);
+      return { success: true, message: 'Driver assigned successfully', data: order };
+    } catch (error) {
+      return { success: false, message: 'Failed to assign driver', error: error.message };
     }
   }
 }

@@ -917,7 +917,3 @@ export class SeedService {
     };
   }
 }
-
-function seedUsers() {
-  throw new Error('Function not implemented.');
-}

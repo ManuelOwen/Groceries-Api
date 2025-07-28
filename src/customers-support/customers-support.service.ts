@@ -2,6 +2,8 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { CreateCustomersSupportDto } from './dto/create-customers-support.dto';
 import { UpdateCustomersSupportDto } from './dto/update-customers-support.dto';
@@ -22,10 +24,22 @@ interface ApiResponse<T = any> {
 
 @Injectable()
 export class CustomersSupportService {
+  private readonly logger = new Logger(CustomersSupportService.name);
+
   constructor(
     @InjectRepository(CustomersSupport)
     private readonly customersSupportRepository: Repository<CustomersSupport>,
   ) {}
+
+  // generate unique ticket number
+  private generateTicketNumber(): string {
+    const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const timestamp = Date.now().toString().slice(-6);
+    const random = Math.floor(Math.random() * 1000)
+      .toString()
+      .padStart(3, '0');
+    return `TKT${date}${timestamp}${random}`;
+  }
 
   // create support ticket
   async createSupportTicket(
@@ -48,11 +62,15 @@ export class CustomersSupportService {
         data: savedTicket,
       };
     } catch (error) {
-      return {
-        success: false,
-        message: 'Failed to create support ticket',
-        error: error.message,
-      };
+      this.logger.error('Failed to create customer support ticket', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : 'No stack trace',
+        ticketData: createCustomersSupportDto,
+      });
+      throw new InternalServerErrorException({
+        message: 'Failed to create customer support ticket',
+        suggestion: 'Please try again later or contact support',
+      });
     }
   }
 
@@ -84,11 +102,14 @@ export class CustomersSupportService {
         data: tickets,
       };
     } catch (error) {
-      return {
-        success: false,
-        message: 'Failed to fetch support tickets',
-        error: error.message,
-      };
+      this.logger.error('Failed to fetch customer support tickets', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : 'No stack trace',
+      });
+      throw new InternalServerErrorException({
+        message: 'Failed to fetch customer support tickets',
+        suggestion: 'Please try again later or contact support',
+      });
     }
   }
 
@@ -124,14 +145,15 @@ export class CustomersSupportService {
         data: ticket,
       };
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      return {
-        success: false,
-        message: `Failed to find support ticket with id ${id}`,
-        error: error.message,
-      };
+      this.logger.error(`Failed to fetch customer support ticket with ID: ${id}`, {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : 'No stack trace',
+        ticketId: id,
+      });
+      throw new InternalServerErrorException({
+        message: 'Failed to fetch customer support ticket',
+        suggestion: 'Please try again later or contact support',
+      });
     }
   }
 
@@ -259,11 +281,16 @@ export class CustomersSupportService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      return {
-        success: false,
-        message: `Failed to update support ticket with id ${id}`,
-        error: error.message,
-      };
+      this.logger.error(`Failed to update customer support ticket with ID: ${id}`, {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : 'No stack trace',
+        ticketId: id,
+        updateData: updateCustomersSupportDto,
+      });
+      throw new InternalServerErrorException({
+        message: 'Failed to update customer support ticket',
+        suggestion: 'Please try again later or contact support',
+      });
     }
   }
 
@@ -297,21 +324,15 @@ export class CustomersSupportService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      return {
-        success: false,
-        message: `Failed to delete support ticket with id ${id}`,
-        error: error.message,
-      };
+      this.logger.error(`Failed to delete customer support ticket with ID: ${id}`, {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : 'No stack trace',
+        ticketId: id,
+      });
+      throw new InternalServerErrorException({
+        message: 'Failed to delete customer support ticket',
+        suggestion: 'Please try again later or contact support',
+      });
     }
-  }
-
-  // generate unique ticket number
-  private generateTicketNumber(): string {
-    const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-    const timestamp = Date.now().toString().slice(-6);
-    const random = Math.floor(Math.random() * 1000)
-      .toString()
-      .padStart(3, '0');
-    return `TKT${date}${timestamp}${random}`;
   }
 }

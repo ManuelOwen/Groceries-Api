@@ -71,6 +71,13 @@ export class Order {
   @Column({ type: 'json', nullable: true })
   items: any[];
 
+  @Column({ nullable: true })
+  assigned_driver_id: number;
+
+  @ManyToOne(() => User, { eager: false })
+  @JoinColumn({ name: 'assigned_driver_id' })
+  assigned_driver: User;
+
   @CreateDateColumn()
   created_at: Date;
 

@@ -3,13 +3,11 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   UseGuards,
   Put,
   ParseIntPipe,
-  Query,
 } from '@nestjs/common';
 import { DriversService } from './drivers.service';
 import { CreateDriverDto } from './dto/create-driver.dto';
@@ -22,7 +20,7 @@ import {
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { RolesGuard } from 'src/auth/guards';
 import { AtGuard } from 'src/auth/token/token.guard';
-import { Public, Roles } from 'src/auth/decorators';
+import { Roles } from 'src/auth/decorators';
 import { Role } from 'src/users/entities/user.entity';
 import { Order } from 'src/orders/entities/order.entity';
 

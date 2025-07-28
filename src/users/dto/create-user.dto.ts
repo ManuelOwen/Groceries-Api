@@ -1,4 +1,3 @@
-import { Type } from 'class-transformer';
 import {
   IsString,
   IsEmail,
@@ -8,7 +7,6 @@ import {
   MinLength,
   MaxLength,
   Matches,
-  IsUrl,
 } from 'class-validator';
 
 import { Role } from '../entities/user.entity';
