@@ -1,30 +1,26 @@
-# ---------- BUILD ----------
-FROM node:22-alpine AS builder
+# ------------------ BUILD ------------------
+    FROM node:22-alpine AS builder
 
-WORKDIR /app
-RUN npm install -g pnpm
+    RUN npm install -g pnpm
 
-# Copy relevant files
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY tsconfig* ./
-COPY src ./src
+    WORKDIR /app
 
+    COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+    RUN pnpm install --frozen-lockfile
 
-RUN pnpm install --frozen-lockfile
-RUN pnpm run build
+    COPY . .
+    RUN pnpm run build
 
-# ---------- PRODUCTION ----------
-FROM node:22-alpine AS production
+    # ------------------ PRODUCTION ------------------
+    FROM node:22-alpine AS production
 
-WORKDIR /app
-RUN npm install -g pnpm
+    RUN npm install -g pnpm
 
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY .env ./
-RUN pnpm install --frozen-lockfile --prod
+    WORKDIR /app
 
-# Copy the built output
-COPY --from=builder /app/dist ./dist
+    COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+    RUN pnpm install --frozen-lockfile --prod
 
-# Adjust this path based on your actual output
-CMD ["node", "dist/main.js"]
+    COPY --from=builder /app/dist ./dist
+
+    CMD ["node", "dist/main.js"]
