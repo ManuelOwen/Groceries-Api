@@ -13,13 +13,16 @@ dotenv.config();
 
       useFactory: () => ({
         type: 'postgres',
-        host: process.env.DB_HOST,
-        port: process.env.DB_PORT
-          ? parseInt(process.env.DB_PORT, 10)
-          : undefined,
-        username: process.env.DB_USER,
-        password: process.env.DB_PASSWORD,
-        database: process.env.DB_DATABASE,
+        // host: process.env.DB_HOST,
+        // port: process.env.DB_PORT
+          // ? parseInt(process.env.DB_PORT, 10)
+          // : undefined,
+        // username: process.env.DB_USER,
+        // password: process.env.DB_PASSWORD,
+        // database: process.env.DB_DATABASE,
+        url: process.env.DATABASE_URL,
+        ssl: true,
+        
         autoLoadEntities: true,
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
         synchronize: process.env.DB_SYNC === 'true' ? true : false,
